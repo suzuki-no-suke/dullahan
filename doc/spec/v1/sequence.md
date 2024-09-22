@@ -35,7 +35,7 @@ json
     'chat_status': <str>,
     'status': <int>,
     'status_message': <str>,
-    'version': 'v1',
+    'message_version': 'v1',
     'messages_history': [
         <see message v1 definition>
     ]

@@ -17,6 +17,7 @@ response
         'botname': <str>,
         'useful_whe': <str>,    # description only written in text
         'descrption': <str>,    # detailed descrition written in markdown 
+        'supported_message_version': List[<str>]
     },
     ...
 ]
@@ -33,12 +34,49 @@ request -> None
 
 ```json
 {
-    {
-        'botname': <str>,
-        'useful_whe': <str>,    # description only written in text
-        'descrption': <str>,    # detailed descrition written in markdown 
-    },
-    ...
+    'botname': <str>,
+    'useful_whe': <str>,    # description only written in text
+    'descrption': <str>,    # detailed descrition written in markdown 
+    'supported_message_version': List[<str>]
 }
 ```
+
+
+## (authentication required) single bot configuration
+
+method : get
+
+  * `/bots/edit/<botname:str>`
+    * botname
+
+```json
+{
+    'botname': <str>,
+    'useful_when': <str>,    # description only written in text
+    'descrption': <str>,    # detailed descrition written in markdown 
+    'supported_message_version': List[<str>],
+    'module_filename': <str>,
+    'clasname': <str>,
+}
+```
+
+## (authentication required) single bot configuration upsert
+
+method : post
+
+  * `/bots/edit/<botname:str>`
+    * botname
+
+```json
+{
+    'botname': <str>,
+    'useful_when': <str>,   # description only written in text
+    'descrption': <str>,    # detailed descrition written in markdown 
+    'supported_message_version': List[<str>],
+    'module_filename': <str>,
+    'clasname': <str>,
+}
+```
+
+
 

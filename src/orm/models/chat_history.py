@@ -18,7 +18,7 @@ class ChatHistory(Base):
     pk = Column(Integer, Identity(), primary_key=True)
     id = Column(String, nullable=False)
     status = Column(sqlalchemy.Enum(ChatStatus), nullable=False)
-    botname = Column(String(255), nullable=False)
+    data_version = Column(String, nullable=False)
 
     def __str__(self) -> str:
-        return f"ChatHistory - {self.pk} {self.id} {self.botname} ({self.status})"
+        return f"ChatHistory - {self.pk} {self.id} {self.data_version} ({self.status})"

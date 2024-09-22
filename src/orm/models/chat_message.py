@@ -17,9 +17,11 @@ class ChatMessage(Base):
 
     pk = Column(Integer, Identity(), primary_key=True)
     id = Column(String, nullable=False)
+    time = Column(DateTime, nullable=False)
     type = Column(sqlalchemy.Enum(ChatType), nullable=False)
+    botname = Column(String, nullable=False)
+    agent = Column(String, nullable=True)
     content = Column(Text)
-    time = Column(DateTime, nullable=False)  # 'time' カラムが NULL を許容するかどうか不明なため、nullable=True にしてあります
 
     def __str__(self) -> str:
-        return f"ChatMessage - {self.pk} {self.id} {self.type} : {self.content[:50]} @ {self.time.isoformat()}"
+        return f"ChatMessage - {self.pk} {self.id} {self.type} {self.botname} @ {self.time.isoformat()} : {self.content[:50]} "

@@ -8,7 +8,7 @@ class ChatMessageList(Base):
 
     history_id = Column(String, primary_key=True)
     message_id = Column(String, primary_key=True)
-    time = Column(DateTime(timezone=False))
+    time = Column(DateTime(timezone=False))     # just for sort
 
     def __str__(self) -> str:
         return f"ChatMessageList - {self.history_id} {self.message_id} @ {self.time.isoformat()}"
