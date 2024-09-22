@@ -1,0 +1,44 @@
+bots information
+=================
+
+## get bot list
+
+endpoint
+
+  * `/bots/list`
+
+request -> None
+
+response
+
+```jsoh
+[
+    {
+        'botname': <str>,
+        'useful_whe': <str>,    # description only written in text
+        'descrption': <str>,    # detailed descrition written in markdown 
+    },
+    ...
+]
+```
+
+## get signle bot
+
+method : get
+
+  * `/bots/detail/<botname:str>`
+    * botname : 存在するボット名
+
+request -> None
+
+```json
+{
+    {
+        'botname': <str>,
+        'useful_whe': <str>,    # description only written in text
+        'descrption': <str>,    # detailed descrition written in markdown 
+    },
+    ...
+}
+```
+
