@@ -8,6 +8,7 @@ app = FastAPI()
 
 import datetime
 import enum
+import uuid
 
 
 # ---------------------------------------------------------
@@ -17,9 +18,10 @@ from src.orm.models.chatbot import ChatBot
 from src.orm.tables.table_chatbot import TableChatbot
 from src.orm.tables.build_chat_history import TableChatHistoryList
 from src.orm.tables.table_chathistory import TableChatHistory
+from src.orm.tables.table_chatmessage import TableChatMessage
 
 from src.orm.models.chat_history import ChatStatus
-
+from src.orm.models.chat_message import ChatMessage, ChatType
 
 # ---------------------------------------------------------
 # 共通ステータス応答
@@ -82,9 +84,31 @@ class ChatHistory(BaseModel):
     history_id: str # uuid
     chat_status: ChatStatus
     data_version: str # v1, etc
+    title: str
+    summary: str
     messages: list[Message_v1 | Message_v2]
 
 
+# ---------------------------------------------------------
+# experimental bot dummy
+async def bot_dummy_v1(mesg: Message_v1) -> Message_v1:
+    # expand user message
+    user_msg = mesg.content
+
+    # llm calling
+    response = f"echobot : {user_msg}"
+
+    # build response
+    bot_mesg = Message_v1(
+        message_id=str(uuid.uuid4()),
+        time=datetime.datetime.now(),
+        type=MessageType_v1.Chatbot,
+        botname="dummybot_v1",
+        agent="dummbot_v1",
+        content=response
+    )
+
+    return bot_mesg
 
 
 # ---------------------------------------------------------
@@ -186,8 +210,8 @@ async def get_chatlist() -> list[ChatShortHistory]:
         history_list.append(ChatShortHistory(
             id=h.id,
             status=h.status,
-            title=h.title if "---" else h.title,
-            summary=h.summary if "---" else h.summary,
+            title=h.title if h.title else "---",
+            summary=h.summary if h.summary else "---",
             message_version=h.message_version
         ))
     return history_list
@@ -198,20 +222,81 @@ async def get_chatlist() -> list[ChatShortHistory]:
 
 # チャット履歴を取得するエンドポイント
 @app.get("/v1/chat/history", tags=["Chatting"])
-@app.get("/v1/chat/history/{id}", tags=["Chatting"])
-async def v1_get_chat_history(id: int = None):
-    if id is None:
-        # 新規作成のロジックを追加
-        return {"message": "New chat history created"}
-    else:
-        # DBからチャット履歴を取得するロジックを追加
-        return {"message": f"Chat history for ID {id} retrieved"}
+@app.get("/v1/chat/history/{history_id}", tags=["Chatting"])
+async def v1_get_chat_history(history_id: int | None = None):
+    dbobj = SQLFactory.default_env()
+    history = TableChatHistory(dbobj)
+    history_msg = TableChatHistoryList(dbobj)
 
-# メッセージを送信するエンドポイント
+    if history_id is None:
+        # 新規作成しそれを返す
+        history_id = history.create_new_history(uuid.uuid4())
+    else:
+        # 存在するかをチェック
+        if not history.exists(history_id):
+            raise HTTPException(status_code=404, detail=f"history {history_id} not exists")
+
+    data = history.get_single_history(history_id)
+    messages = history_msg.get_all_messages(history_id)
+
+    # build response
+    response_messages = [
+        Message_v1(
+            message_id=m.id,
+            time=m.time,
+            type=m.type,
+            botname=m.botname,
+            agent=m.agent,
+            content=m.content
+        ) for m in messages
+    ]
+    response_history = ChatHistory(
+        history_id=history_id,
+        chat_status=data.status,
+        data_version=data.message_version,
+        title=data.title if data.title else "---",
+        summary=data.summary if data.summary else "---",
+        messages=response_messages
+    )
+    return response_history
+
+
 @app.post("/v1/chat/send", tags=["Chatting"])
-async def v1_send_message(message: Message_v1):
-    # ここにメッセージ送信のロジックを追加
-    return {"message": "Message sent", "content": message.content}  # 変更: message.contentにアクセス
+async def v1_send_message(history_id: str, message: Message_v1):
+    dbobj = SQLFactory.default_env()
+    history = TableChatHistory(dbobj)
+    history_msg = TableChatHistoryList(dbobj)
+    msg_table = TableChatMessage(dbobj)
+
+    # history の存在確認
+    if not history.exists(history_id):
+        raise HTTPException(status_code=404, detail=f"history {history_id} not exists")
+
+    # add user messages to history
+    new_message_data = ChatMessage(
+        id=str(uuid.uuid4()),
+        time=datetime.datetime.now(),   # ignore client side timestamp
+        type=message.type,
+        botname=message.botname,
+        agent=message.agent,
+        content=message.content,
+        message_version="v1"
+    )
+
+    # message added to db
+    msg_table.upsert_message(new_message_data)
+    msg_id = new_message_data.id
+    history_msg.append_new_message(history_id, msg_id, new_message_data.time)
+
+    # TBD : Chatbot 応答の構築
+    bot_msg = bot_dummy_v1(message)
+
+    # Chatbot message added to db
+    msg_table.upsert_message(bot_msg)
+    history_msg.append_new_message(history_id, bot_msg.id, bot_msg.time)
+
+    # 応答の返却
+    return bot_msg
 
 
 # ---------------------------------------------------------
