@@ -6,12 +6,19 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+import datetime
+import enum
+
 
 # ---------------------------------------------------------
 
 from src.orm.Base import SQLFactory
 from src.orm.models.chatbot import ChatBot
 from src.orm.tables.table_chatbot import TableChatbot
+from src.orm.tables.build_chat_history import TableChatHistoryList
+from src.orm.tables.table_chathistory import TableChatHistory
+
+from src.orm.models.chat_history import ChatStatus
 
 
 # ---------------------------------------------------------
@@ -37,13 +44,52 @@ class BotsDetail(BaseModel):
     classname: str
 
 # chat history 定義
-class Message(BaseModel):
+class MessageType_v1(enum.Enum):
+    Human = 'human'
+    Chatbot = 'chatbot'
+
+class Message_v1(BaseModel):
+    message_id: str # uuid
+    time: datetime.datetime
+    type: MessageType_v1
+    botname: str
+    agent: str
     content: str
+
+class MessageType_v2(enum.Enum):
+    Human = 'human'
+    HumanMeta = 'human_meta'
+    Chatbot = 'chatbot'
+    BotsMeta = 'bots_meta'
+
+class Message_v2(BaseModel):
+    message_id: str # uuid
+    time: datetime.datetime
+    type: MessageType_v2
+    botname: str
+    agent: str
+    content: str
+    body: dict
+
+class ChatShortHistory(BaseModel):
+    history_id: str # uuid
+    chat_status: ChatStatus
+    data_version: str # v1, etc
+    title: str
+    summary: str
+
+class ChatHistory(BaseModel):
+    history_id: str # uuid
+    chat_status: ChatStatus
+    data_version: str # v1, etc
+    messages: list[Message_v1 | Message_v2]
+
+
 
 
 # ---------------------------------------------------------
 # bots list
-@app.get("/bots/list")
+@app.get("/bots/list", tags=["Chatbot"])
 async def get_chatbot_list() -> list[BotsInfo]:
     dbobj = SQLFactory.default_env()
 
@@ -64,7 +110,7 @@ async def get_chatbot_list() -> list[BotsInfo]:
         bots.append(b_data)
     return bots
 
-@app.get("/bots/detail/{botname}")
+@app.get("/bots/detail/{botname}", tags=["Chatbot"])
 async def get_chatbot_detail(botname: str) -> BotsInfo:
     dbobj = SQLFactory.default_env()
 
@@ -84,7 +130,7 @@ async def get_chatbot_detail(botname: str) -> BotsInfo:
     )
     return b_data
 
-@app.get("/bots/edit/{botname}", response_model=BotsDetail)  # 変更: GETリクエストでBotsDetailを返す
+@app.get("/bots/edit/{botname}", response_model=BotsDetail, tags=["Chatbot"])
 async def get_bot_detail_for_edit(botname: str) -> BotsDetail:
     dbobj = SQLFactory.default_env()
     chatbots = TableChatbot(dbobj)
@@ -104,8 +150,8 @@ async def get_bot_detail_for_edit(botname: str) -> BotsDetail:
     )
     return b_data
 
-@app.post("/bots/edit/")  # 変更: POSTリクエストを追加
-async def edit_bot(bot: BotsDetail):  # 変更: 引数をBotsDetail型に変更
+@app.post("/bots/edit/", tags=["Chatbot"])
+async def edit_bot(bot: BotsDetail):
     dbobj = SQLFactory.default_env()
     chatbots = TableChatbot(dbobj)
 
@@ -129,12 +175,30 @@ async def edit_bot(bot: BotsDetail):  # 変更: 引数をBotsDetail型に変更
 # ---------------------------------------------------------
 # chat history list definition
 
+@app.get("/chatlist", tags=["HistoryList"])
+async def get_chatlist() -> list[ChatShortHistory]:
+    dbobj = SQLFactory.default_env()
+    history = TableChatHistory(dbobj)
+    
+    all_history = history.get_all_history()
+    history_list = []
+    for h in all_history:
+        history_list.append(ChatShortHistory(
+            id=h.id,
+            status=h.status,
+            title=h.title if "---" else h.title,
+            summary=h.summary if "---" else h.summary,
+            message_version=h.message_version
+        ))
+    return history_list
+
+
 # ---------------------------------------------------------
 # v1 chatting definition
 
 # チャット履歴を取得するエンドポイント
-@app.get("/v1/chat/history")
-@app.get("/v1/chat/history/{id}")
+@app.get("/v1/chat/history", tags=["Chatting"])
+@app.get("/v1/chat/history/{id}", tags=["Chatting"])
 async def v1_get_chat_history(id: int = None):
     if id is None:
         # 新規作成のロジックを追加
@@ -144,8 +208,8 @@ async def v1_get_chat_history(id: int = None):
         return {"message": f"Chat history for ID {id} retrieved"}
 
 # メッセージを送信するエンドポイント
-@app.post("/v1/chat/send")
-async def v1_send_message(message: Message):  # 変更: 引数をMessage型に変更
+@app.post("/v1/chat/send", tags=["Chatting"])
+async def v1_send_message(message: Message_v1):
     # ここにメッセージ送信のロジックを追加
     return {"message": "Message sent", "content": message.content}  # 変更: message.contentにアクセス
 

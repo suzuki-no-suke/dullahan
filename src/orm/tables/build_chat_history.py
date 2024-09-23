@@ -1,6 +1,6 @@
 from src.orm.models.chat_message_list import ChatMessageList
 
-class TableChatMessenge:
+class TableChatHistoryList:
     def __init__(self, dbobj):
         self.dbobj = dbobj
 
