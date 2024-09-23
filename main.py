@@ -182,29 +182,3 @@ async def v1_send_message(history_id: str, message: Message_v1):
     # 応答の返却
     return bot_msg
 
-
-# ---------------------------------------------------------
-# support frontend response
-
-from fastapi.responses import HTMLResponse
-import os
-
-@app.get("/help_ui/{filename}", response_class=HTMLResponse)
-async def get_help_ui(filename: str):
-    file_path = os.path.join("help_ui", filename)
-    if os.path.exists(file_path):
-        with open(file_path, "r", encoding="utf-8") as file:
-            content = file.read()
-        return HTMLResponse(content=content)
-    else:
-        return HTMLResponse(content="File not found", status_code=404)
-
-@app.get("/help_ui/statics/{filename}", response_class=HTMLResponse)
-async def get_help_ui_statics(filename: str):
-    file_path = os.path.join("help_ui", "statics", filename)
-    if os.path.exists(file_path):
-        with open(file_path, "r", encoding="utf-8") as file:
-            content = file.read()
-        return HTMLResponse(content=content)
-    else:
-        return HTMLResponse(content="File not found", status_code=404)
