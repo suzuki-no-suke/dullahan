@@ -32,7 +32,7 @@ class ChatMessage(Base):
         }
 
     @classmethod
-    def build_msg_v1(sender: MessageSenderType, botname: str, agent: str, content: str):
+    def build_msg_v1(cls, sender: MessageSenderType, botname: str, agent: str, content: str):
         return ChatMessage(
             id=str(uuid.uuid4()),
             time=datetime.datetime.now(),

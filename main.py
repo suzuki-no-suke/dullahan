@@ -41,7 +41,7 @@ async def bot_dummy_v1(mesg: Message_v1) -> Message_v1:
 
     # build response
     bot_mesg = Message_v1.build_msg(
-        sender=MessageSenderType.Chatbot,
+        sender=MessageSenderType.chatbot,
         botname="dummybot_v1",
         agent="dummybot_v1",
         content=response,
@@ -113,15 +113,9 @@ async def get_chatlist() -> list[ChatShortHistory]:
     history = TableChatHistory(dbobj)
     
     all_history = history.get_all_history()
-    history_list = []
-    for h in all_history:
-        history_list.append(ChatShortHistory(
-            id=h.id,
-            status=h.status,
-            title=h.title if h.title else "---",
-            summary=h.summary if h.summary else "---",
-            message_version=h.message_version
-        ))
+    # print(all_history)
+
+    history_list = [ChatShortHistory.from_db(h) for h in all_history]
     return history_list
 
 
@@ -131,14 +125,14 @@ async def get_chatlist() -> list[ChatShortHistory]:
 # チャット履歴を取得するエンドポイント
 @app.get("/v1/chat/history", tags=["Chatting"])
 @app.get("/v1/chat/history/{history_id}", tags=["Chatting"])
-async def v1_get_chat_history(history_id: int | None = None):
+async def v1_get_chat_history(history_id: str | None = None):
     dbobj = SQLFactory.default_env()
     history = TableChatHistory(dbobj)
     history_msg = TableChatHistoryList(dbobj)
 
     if history_id is None:
         # 新規作成しそれを返す
-        history_id = history.create_new_history(uuid.uuid4())
+        history_id = history.create_new_history(str(uuid.uuid4()))
     else:
         # 存在するかをチェック
         if not history.exists(history_id):
@@ -148,15 +142,8 @@ async def v1_get_chat_history(history_id: int | None = None):
     messages = history_msg.get_all_messages(history_id)
 
     # build response
-    response_messages = [Message_v1.from_db(m) for m in messages]
-    response_history = ChatHistory(
-        history_id=history_id,
-        chat_status=data.status,
-        data_version=data.message_version,
-        title=data.title if data.title else "---",
-        summary=data.summary if data.summary else "---",
-        messages=response_messages
-    )
+    response_history = ChatHistory.from_db(data)
+    response_history.messages = [Message_v1.from_db(m) for m in messages]
     return response_history
 
 
@@ -173,6 +160,11 @@ async def v1_send_message(history_id: str, message: Message_v1):
 
     # add user messages to history
     new_message_data = message.to_db()
+    new_message_data.id = str(uuid.uuid4())
+    new_message_data.time = datetime.datetime.now()
+
+    # update status
+    history.update_status(history_id, ChatStatus.in_progress)
 
     # message added to db
     msg_table.upsert_message(new_message_data)
@@ -180,11 +172,12 @@ async def v1_send_message(history_id: str, message: Message_v1):
     history_msg.append_new_message(history_id, msg_id, new_message_data.time)
 
     # TBD : Chatbot 応答の構築
-    bot_msg = bot_dummy_v1(message)
+    bot_msg = await bot_dummy_v1(message)
 
     # Chatbot message added to db
     msg_table.upsert_message(bot_msg.to_db())
-    history_msg.append_new_message(history_id, bot_msg.id, bot_msg.time)
+    history_msg.append_new_message(history_id, bot_msg.message_id, bot_msg.time)
+    history.update_status(history_id, ChatStatus.completed)
 
     # 応答の返却
     return bot_msg

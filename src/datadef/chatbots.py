@@ -35,12 +35,12 @@ class BotsDetail(BaseModel):
     @classmethod
     def from_db(cls, db_data):
         return BotsDetail(
-            botname=b.botname,
-            useful_when=b.useful_when,
-            description=b.description,
-            supported_message_version=b.enable_version,
-            module_filename=b.module_filename,
-            classname=b.classname,
+            botname=db_data.botname,
+            useful_when=db_data.useful_when,
+            description=db_data.description,
+            supported_message_version=db_data.enable_version,
+            module_filename=db_data.module_filename,
+            classname=db_data.classname,
         )
 
     def to_db(self):

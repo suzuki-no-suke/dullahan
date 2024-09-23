@@ -1,0 +1,70 @@
+from fastapi.testclient import TestClient
+
+from main import app
+
+import unittest
+
+from src.datadef.enums.chat_status import ChatStatus
+
+
+class TestChatSequence(unittest.TestCase):
+    client = None
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.client = TestClient(app)
+        cls.client.post("/bots/edit",
+                    json={
+                        "botname": "test",
+                        "useful_when": "string",
+                        "description": "string",
+                        "supported_message_version": [
+                            "v1"
+                        ],
+                        "module_filename": "string",
+                        "classname": "string"
+                    })
+
+    def test_create_and_get_chat(self):
+        # create
+        response = self.client.get("/v1/chat/history/")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsNotNone(data["history_id"])
+        self.assertEqual("waiting", data["chat_status"])
+        self.assertEqual("v1", data["message_version"])
+
+        history_id = data["history_id"]
+
+        # get
+        response = self.client.get(f"/v1/chat/history/{history_id}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsNotNone(data["history_id"])
+        self.assertEqual("waiting", data["chat_status"])
+        self.assertEqual("v1", data["message_version"])
+
+    def test_chatting(self):
+        # create
+        response = self.client.get("/v1/chat/history/")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsNotNone(data["history_id"])
+        self.assertEqual("waiting", data["chat_status"])
+        self.assertEqual("v1", data["message_version"])
+
+        history_id = data["history_id"]
+
+        # send message
+        chatdata = {
+            "sender_type": "human",
+            "botname": "human",
+            "agent": "human",
+            "content": "hello world",
+        }
+        response = self.client.post(f"/v1/chat/send?history_id={history_id}", json=chatdata)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual("chatbot", data["sender_type"])
+
+

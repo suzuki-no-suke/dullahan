@@ -52,7 +52,7 @@ cur.execute('''
         pk INTEGER PRIMARY KEY AUTOINCREMENT,
         id TEXT NOT NULL,
         time TIMESTAMP NOT NULL,
-        type TEXT CHECK(type IN ('human', 'user_meta', 'chatbot', 'bots_meta')) NOT NULL,
+        sender_type TEXT CHECK(sender_type IN ('human', 'user_meta', 'chatbot', 'bots_meta')) NOT NULL,
         botname TEXT NOT NULL,
         agent TEXT,
         content TEXT,

@@ -1,7 +1,7 @@
 import enum
 
 class MessageSenderType(enum.Enum):
-    Human = 'human'
-    UserMeta = 'user_meta'
-    Chatbot = 'chatbot'
-    BotsMeta = 'bots_meta'
+    human = 'human'
+    user_meta = 'user_meta'
+    chatbot = 'chatbot'
+    bots_meta = 'bots_meta'

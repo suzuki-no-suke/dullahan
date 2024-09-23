@@ -10,15 +10,15 @@ from .enums.message_sender_type import MessageSenderType
 # chat history 定義
 
 class Message_v1(BaseModel):
-    message_id: str # uuid
-    time: datetime.datetime
+    message_id: str = None # uuid
+    time: datetime.datetime = None
     sender_type: MessageSenderType
     botname: str
     agent: str
     content: str
 
     @classmethod
-    def build_msg(sender: MessageSenderType, botname: str, agent: str, content: str):
+    def build_msg(cls, sender: MessageSenderType, botname: str, agent: str, content: str):
         return Message_v1(
             message_id=str(uuid.uuid4()),
             time=datetime.datetime.now(),

@@ -1,7 +1,7 @@
 import enum
 
 class ChatStatus(enum.Enum):
-    Waiting = 'waiting'
-    InProgress = 'in_progress'
-    Failed = 'failed'
-    Completed = 'completed'
+    waiting = 'waiting'
+    in_progress = 'in_progress'
+    failed = 'failed'
+    completed = 'completed'

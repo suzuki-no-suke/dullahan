@@ -14,7 +14,7 @@ class TableChatHistory:
             sess = s.session
             new_history = ChatHistory(
                 id=uuid,
-                status=ChatStatus.Waiting,
+                status=ChatStatus.waiting,
                 title=None,
                 summary=None,
                 message_version="v1"
@@ -33,6 +33,13 @@ class TableChatHistory:
                 return True
             return False
 
+    def update_status(self,  history_id, status):
+        with self.dbobj.get_new_session() as s:
+            sess = s.session
+            sess.query(ChatHistory) \
+                .filter_by(id=history_id) \
+                .update({"status": status})
+            return status
 
     def get_single_history(self, history_id):
         with self.dbobj.get_new_session() as s:
