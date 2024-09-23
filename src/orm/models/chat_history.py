@@ -18,7 +18,17 @@ class ChatHistory(Base):
     pk = Column(Integer, Identity(), primary_key=True)
     id = Column(String, nullable=False)
     status = Column(sqlalchemy.Enum(ChatStatus), nullable=False)
-    data_version = Column(String, nullable=False)
+    title = Column(String, nullable=True)
+    summary = Column(String, nullable=True)
+    message_version = Column(String, nullable=False)
+
+    def diff_dict(self):
+        return {
+            'status': self.status,
+            'title': self.title,
+            'summary': self.summary,
+            'message_version': self.message_version,
+        }
 
     def __str__(self) -> str:
-        return f"ChatHistory - {self.pk} {self.id} {self.data_version} ({self.status})"
+        return f"ChatHistory - {self.pk} {self.id} {self.message_version} ({self.status})"

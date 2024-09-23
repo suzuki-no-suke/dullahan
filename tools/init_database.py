@@ -31,7 +31,9 @@ cur.execute('''
         pk INTEGER PRIMARY KEY AUTOINCREMENT,
         id TEXT NOT NULL,
         status TEXT CHECK(status IN ('waiting', 'in_progress', 'failed', 'completed')) NOT NULL,
-        data_version JSON NOT NULL
+        title TEXT,
+        summary TEXT, 
+        message_version TEXT NOT NULL
     );
 ''')
 
@@ -53,7 +55,8 @@ cur.execute('''
         type TEXT CHECK(type IN ('human', 'user_meta', 'chatbot', 'bots_meta')) NOT NULL,
         botname TEXT NOT NULL,
         agent TEXT,
-        content TEXT
+        content TEXT,
+        message_version TEXT NOT NULL
     );
 ''')
 

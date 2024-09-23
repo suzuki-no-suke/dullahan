@@ -22,6 +22,17 @@ class ChatMessage(Base):
     botname = Column(String, nullable=False)
     agent = Column(String, nullable=True)
     content = Column(Text)
+    message_version = Column(Text, nullable=False)
+
+    def diff_dict(self):
+        return {
+            'time': self.time,
+            'type': self.type,
+            'botname': self.botname,
+            'agent': self.agent,
+            'content': self.content,
+            'message_version': self.message_version
+        }
 
     def __str__(self) -> str:
-        return f"ChatMessage - {self.pk} {self.id} {self.type} {self.botname} @ {self.time.isoformat()} : {self.content[:50]} "
+        return f"ChatMessage - {self.pk} {self.id} {self.type} {self.botname} {self.message_version} @ {self.time.isoformat()} : {self.content[:50]} "
