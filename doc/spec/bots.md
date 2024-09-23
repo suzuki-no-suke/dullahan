@@ -56,7 +56,7 @@ method : get
     'descrption': <str>,    # detailed descrition written in markdown 
     'supported_message_version': List[<str>],
     'module_filename': <str>,
-    'clasname': <str>,
+    'classname': <str>,
 }
 ```
 
@@ -74,7 +74,7 @@ method : post
     'descrption': <str>,    # detailed descrition written in markdown 
     'supported_message_version': List[<str>],
     'module_filename': <str>,
-    'clasname': <str>,
+    'classname': <str>,
 }
 ```
 

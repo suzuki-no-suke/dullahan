@@ -2,11 +2,14 @@ import sqlite3
 import os
 from dotenv import load_dotenv
 
-load_dotenv("../.env")
+load_dotenv()
 DB_CONN = os.getenv('DB_CONN')
 print(f"db connected -> {DB_CONN}")
 db_file = DB_CONN.replace('sqlite:///', '')
-conn = sqlite3.connect(db_file)
+print(f"db file -> {db_file}")
+full_db_path = os.path.abspath(db_file)
+print(f"db fullpath -> {full_db_path}")
+conn = sqlite3.connect(full_db_path)
 cur = conn.cursor()
 
 # CREATE TABLEs
@@ -14,6 +17,9 @@ cur.execute('''
     CREATE TABLE IF NOT EXISTS chatbot (
         pk INTEGER PRIMARY KEY AUTOINCREMENT,
         botname TEXT NOT NULL,
+        useful_when TEXT NOT NULL,
+        description TEXT,
+        enable_version JSON,
         module_filename TEXT,
         classname TEXT
     );
@@ -25,7 +31,7 @@ cur.execute('''
         pk INTEGER PRIMARY KEY AUTOINCREMENT,
         id TEXT NOT NULL,
         status TEXT CHECK(status IN ('waiting', 'in_progress', 'failed', 'completed')) NOT NULL,
-        botname TEXT NOT NULL
+        data_version JSON NOT NULL
     );
 ''')
 
@@ -43,18 +49,11 @@ cur.execute('''
     CREATE TABLE IF NOT EXISTS chat_message (
         pk INTEGER PRIMARY KEY AUTOINCREMENT,
         id TEXT NOT NULL,
+        time TIMESTAMP NOT NULL,
         type TEXT CHECK(type IN ('human', 'user_meta', 'chatbot', 'bots_meta')) NOT NULL,
-        content TEXT,
-        time TIMESTAMP
-    );
-''')
-
-cur.execute('''
-    CREATE TABLE IF NOT EXISTS file_content (
-        pk INTEGER PRIMARY KEY AUTOINCREMENT,
-        id TEXT NOT NULL,
-        extension TEXT DEFAULT '',  -- 拡張子、ドット不要 (例: png, jpg, pdfなど)
-        original_filename TEXT NOT NULL
+        botname TEXT NOT NULL,
+        agent TEXT,
+        content TEXT
     );
 ''')
 
