@@ -2,7 +2,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -21,72 +20,14 @@ from src.orm.tables.table_chathistory import TableChatHistory
 from src.orm.tables.table_chatmessage import TableChatMessage
 
 from src.orm.models.chat_history import ChatStatus
-from src.orm.models.chat_message import ChatMessage, ChatType
+from src.orm.models.chat_message import ChatMessage, MessageSenderType
 
 # ---------------------------------------------------------
-# 共通ステータス応答
-class GeneralStatus(BaseModel):
-    status: int
-    message: str
-    detail: str = ""
 
-# bots information 定義
-class BotsInfo(BaseModel):
-    botname: str
-    useful_when: str
-    description: str
-    supported_message_version: list[str]
-
-class BotsDetail(BaseModel):
-    botname: str
-    useful_when: str
-    description: str
-    supported_message_version: list[str]
-    module_filename: str
-    classname: str
-
-# chat history 定義
-class MessageType_v1(enum.Enum):
-    Human = 'human'
-    Chatbot = 'chatbot'
-
-class Message_v1(BaseModel):
-    message_id: str # uuid
-    time: datetime.datetime
-    type: MessageType_v1
-    botname: str
-    agent: str
-    content: str
-
-class MessageType_v2(enum.Enum):
-    Human = 'human'
-    HumanMeta = 'human_meta'
-    Chatbot = 'chatbot'
-    BotsMeta = 'bots_meta'
-
-class Message_v2(BaseModel):
-    message_id: str # uuid
-    time: datetime.datetime
-    type: MessageType_v2
-    botname: str
-    agent: str
-    content: str
-    body: dict
-
-class ChatShortHistory(BaseModel):
-    history_id: str # uuid
-    chat_status: ChatStatus
-    data_version: str # v1, etc
-    title: str
-    summary: str
-
-class ChatHistory(BaseModel):
-    history_id: str # uuid
-    chat_status: ChatStatus
-    data_version: str # v1, etc
-    title: str
-    summary: str
-    messages: list[Message_v1 | Message_v2]
+from src.datadef.general import GeneralStatus
+from src.datadef.chatbots import BotsInfo, BotsDetail
+from src.datadef.chat_message import Message_v1
+from src.datadef.chat_history import ChatHistory, ChatShortHistory
 
 
 # ---------------------------------------------------------
@@ -99,13 +40,11 @@ async def bot_dummy_v1(mesg: Message_v1) -> Message_v1:
     response = f"echobot : {user_msg}"
 
     # build response
-    bot_mesg = Message_v1(
-        message_id=str(uuid.uuid4()),
-        time=datetime.datetime.now(),
-        type=MessageType_v1.Chatbot,
+    bot_mesg = Message_v1.build_msg(
+        sender=MessageSenderType.Chatbot,
         botname="dummybot_v1",
-        agent="dummbot_v1",
-        content=response
+        agent="dummybot_v1",
+        content=response,
     )
 
     return bot_mesg
@@ -121,17 +60,7 @@ async def get_chatbot_list() -> list[BotsInfo]:
     chatbots = TableChatbot(dbobj)
     allbots = chatbots.get_all_bots()
 
-    print(allbots)
-
-    bots = []
-    for b in allbots:
-        b_data = BotsInfo(
-            botname=b.botname,
-            useful_when=b.useful_when,
-            description=b.description,
-            supported_message_version=b.enable_version,
-        )
-        bots.append(b_data)
+    bots = [BotsInfo.from_db(b) for b in allbots]
     return bots
 
 @app.get("/bots/detail/{botname}", tags=["Chatbot"])
@@ -145,13 +74,7 @@ async def get_chatbot_detail(botname: str) -> BotsInfo:
     if not single_bot:
         return HTMLResponse(content="Bot not found", status_code=404)
 
-    b = single_bot[0]
-    b_data = BotsInfo(
-        botname=b.botname,
-        useful_when=b.useful_when,
-        description=b.description,
-        supported_message_version=b.enable_version,
-    )
+    b_data = BotsInfo.from_db(single_bot[0])
     return b_data
 
 @app.get("/bots/edit/{botname}", response_model=BotsDetail, tags=["Chatbot"])
@@ -163,15 +86,7 @@ async def get_bot_detail_for_edit(botname: str) -> BotsDetail:
     if not single_bot:
         raise HTTPException(status_code=404, detail="Bot not found")
 
-    b = single_bot[0]
-    b_data = BotsDetail(
-        botname=b.botname,
-        useful_when=b.useful_when,
-        description=b.description,
-        supported_message_version=b.enable_version,
-        module_filename=b.module_filename,
-        classname=b.classname,
-    )
+    b_data = BotsDetail.from_db(single_bot[0])
     return b_data
 
 @app.post("/bots/edit/", tags=["Chatbot"])
@@ -180,14 +95,7 @@ async def edit_bot(bot: BotsDetail):
     chatbots = TableChatbot(dbobj)
 
     # upsert bot
-    botdata = ChatBot(
-        botname=bot.botname,
-        useful_when=bot.useful_when,
-        description=bot.description,
-        enable_version=bot.supported_message_version,
-        module_filename=bot.module_filename,
-        classname=bot.classname,
-    )
+    botdata = bot.to_db()
     upserted = chatbots.upsert_single_bot(botdata)
     
     return GeneralStatus(
@@ -240,16 +148,7 @@ async def v1_get_chat_history(history_id: int | None = None):
     messages = history_msg.get_all_messages(history_id)
 
     # build response
-    response_messages = [
-        Message_v1(
-            message_id=m.id,
-            time=m.time,
-            type=m.type,
-            botname=m.botname,
-            agent=m.agent,
-            content=m.content
-        ) for m in messages
-    ]
+    response_messages = [Message_v1.from_db(m) for m in messages]
     response_history = ChatHistory(
         history_id=history_id,
         chat_status=data.status,
@@ -273,15 +172,7 @@ async def v1_send_message(history_id: str, message: Message_v1):
         raise HTTPException(status_code=404, detail=f"history {history_id} not exists")
 
     # add user messages to history
-    new_message_data = ChatMessage(
-        id=str(uuid.uuid4()),
-        time=datetime.datetime.now(),   # ignore client side timestamp
-        type=message.type,
-        botname=message.botname,
-        agent=message.agent,
-        content=message.content,
-        message_version="v1"
-    )
+    new_message_data = message.to_db()
 
     # message added to db
     msg_table.upsert_message(new_message_data)
@@ -292,7 +183,7 @@ async def v1_send_message(history_id: str, message: Message_v1):
     bot_msg = bot_dummy_v1(message)
 
     # Chatbot message added to db
-    msg_table.upsert_message(bot_msg)
+    msg_table.upsert_message(bot_msg.to_db())
     history_msg.append_new_message(history_id, bot_msg.id, bot_msg.time)
 
     # 応答の返却

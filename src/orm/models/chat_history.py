@@ -4,13 +4,7 @@ import sqlalchemy
 from sqlalchemy.schema import Column, Identity
 from sqlalchemy.types import Integer, String
 
-import enum
-
-class ChatStatus(enum.Enum):
-    Waiting = 'waiting'
-    InProgress = 'in_progress'
-    Failed = 'failed'
-    Completed = 'completed'
+from src.datadef.enums.chat_status import ChatStatus
 
 class ChatHistory(Base):
     __tablename__ = 'chat_history'
