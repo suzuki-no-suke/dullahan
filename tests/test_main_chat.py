@@ -15,14 +15,15 @@ class TestChatSequence(unittest.TestCase):
         cls.client = TestClient(app)
         cls.client.post("/bots/edit",
                     json={
-                        "botname": "test",
+                        "botname": "echobot",
+                        "display_name": "echobot",
                         "useful_when": "string",
                         "description": "string",
                         "supported_message_version": [
                             "v1"
                         ],
-                        "module_filename": "string",
-                        "classname": "string"
+                        "module_filename": "v1.Echobot",
+                        "classname": "Echobot"
                     })
 
     def test_create_and_get_chat(self):
@@ -58,7 +59,7 @@ class TestChatSequence(unittest.TestCase):
         # send message
         chatdata = {
             "sender_type": "human",
-            "botname": "human",
+            "botname": "echobot",
             "agent": "human",
             "content": "hello world",
         }

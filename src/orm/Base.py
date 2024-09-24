@@ -30,7 +30,8 @@ class SQLFactory:
     """SQLAlchemy の接続を管理するクラス"""
     def __init__(self, db_uri):
         self.db_uri = db_uri
-        self.engine = create_engine(self.db_uri, echo=True)
+        echoflag = os.getenv('DEBUG_QUERY_ECHO', False) == "True"
+        self.engine = create_engine(self.db_uri, echo=echoflag)
 
     @classmethod
     def default_env(cls):

@@ -12,7 +12,7 @@ class TableChatbot:
     def get_single_bot(self, botname):
         with self.dbobj.get_new_session() as s:
             sess = s.session
-            return sess.query(ChatBot).filter_by(botname=botname).all()
+            return sess.query(ChatBot).filter_by(botname=botname).first()
 
     def upsert_single_bot(self, chatbot):
         with self.dbobj.get_new_session() as s:

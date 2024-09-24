@@ -43,28 +43,9 @@ from src.datadef.chat_message import Message_v1
 from src.datadef.chat_history import ChatHistory, ChatShortHistory
 from src.datadef.chat_updates import ChatDiff_v1
 
-
 # ---------------------------------------------------------
-# experimental bot dummy
-async def bot_dummy_v1(mesg: Message_v1) -> list[Message_v1]:
-    bot_resp = []
 
-    # bots core
-    # expand user message
-    user_msg = mesg.content
-
-    # llm calling
-    response = f"echobot : {user_msg}"
-
-    # build response
-    bot_resp.append(Message_v1.build_msg(
-        sender=MessageSenderType.chatbot,
-        botname="dummybot_v1",
-        agent="dummybot_v1",
-        content=response,
-    ))
-
-    return bot_resp
+from src.bots_manag.bot_manage import BotManager
 
 
 # ---------------------------------------------------------
@@ -91,7 +72,7 @@ async def get_chatbot_detail(botname: str) -> BotsInfo:
     if not single_bot:
         return HTMLResponse(content="Bot not found", status_code=404)
 
-    b_data = BotsInfo.from_db(single_bot[0])
+    b_data = BotsInfo.from_db(single_bot)
     return b_data
 
 @app.get("/bots/edit/{botname}", response_model=BotsDetail, tags=["Chatbot"])
@@ -103,7 +84,7 @@ async def get_bot_detail_for_edit(botname: str) -> BotsDetail:
     if not single_bot:
         raise HTTPException(status_code=404, detail="Bot not found")
 
-    b_data = BotsDetail.from_db(single_bot[0])
+    b_data = BotsDetail.from_db(single_bot)
     return b_data
 
 @app.post("/bots/edit/", tags=["Chatbot"])
@@ -170,6 +151,7 @@ async def v1_send_message(history_id: str, message: Message_v1) -> ChatDiff_v1:
     history = TableChatHistory(dbobj)
     history_msg = TableChatHistoryList(dbobj)
     msg_table = TableChatMessage(dbobj)
+    bots_table = TableChatbot(dbobj)
 
     # history の存在確認
     if not history.exists(history_id):
@@ -195,8 +177,14 @@ async def v1_send_message(history_id: str, message: Message_v1) -> ChatDiff_v1:
     msg_id = new_message_data.id
     history_msg.append_new_message(history_id, msg_id, new_message_data.time)
 
-    # TBD : response dynamically called by name
-    bot_resp = await bot_dummy_v1(message)
+    # load and call bot
+    botdef = bots_table.get_single_bot(message.botname)
+    if not botdef:
+        raise HTTPException(404, f"requested bot ({message.botname}) not found")
+
+    mgr = BotManager(botdef)
+    mgr.load()
+    bot_resp = await mgr.send(message)
 
     chat_resp.messages += bot_resp
 

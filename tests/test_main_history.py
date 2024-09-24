@@ -11,17 +11,6 @@ class TestHistoryList(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.client = TestClient(app)
-        cls.client.post("/bots/edit",
-                    json={
-                        "botname": "test",
-                        "useful_when": "string",
-                        "description": "string",
-                        "supported_message_version": [
-                            "v1"
-                        ],
-                        "module_filename": "string",
-                        "classname": "string"
-                    })
 
     def test_history_list(self):
         response = self.client.get("/chatlist")
