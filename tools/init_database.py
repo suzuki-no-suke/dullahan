@@ -2,12 +2,12 @@ import sqlite3
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv('../.env')
 DB_CONN = os.getenv('DB_CONN')
 print(f"db connected -> {DB_CONN}")
 db_file = DB_CONN.replace('sqlite:///', '')
 print(f"db file -> {db_file}")
-full_db_path = os.path.abspath(db_file)
+full_db_path = os.path.abspath(os.path.join("..", db_file))
 print(f"db fullpath -> {full_db_path}")
 conn = sqlite3.connect(full_db_path)
 cur = conn.cursor()
