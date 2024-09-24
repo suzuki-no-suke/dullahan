@@ -13,8 +13,8 @@
     ];
 </script>
 
-<!-- laternative ideas 
-<nav class="level has-background-primary">
+<!-- laternative ideas -->
+<nav class="level">
     <div class="level-left">
         <a href="/" class="level-item">
             <img src="/dullahan.png" width="32px" height="32px" alt="アイコン & トップへ戻る" />
@@ -29,11 +29,10 @@
     </div>
     <div class="level-right">
       <div class="level-item">
-        <img src="/gear.svg" width="24px" height="24px" alt="設定" />
+        <img src="/gear.svg" width="32px" height="32px" alt="設定" />
         </div>
     </div>
 </nav>
--->
 
 <!-- topmenu -->
 <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
@@ -53,7 +52,7 @@
       <div class="navbar-start">
       </div>
     </div>
-    <div class="navbar-end is-active">
+    <div class="navbar-end">
       <div class="navbar-item">
           <img src="/gear.svg" width="32px" height="32px" alt="設定" />
       </div>
