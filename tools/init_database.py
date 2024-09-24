@@ -17,6 +17,7 @@ cur.execute('''
     CREATE TABLE IF NOT EXISTS chatbot (
         pk INTEGER PRIMARY KEY AUTOINCREMENT,
         botname TEXT NOT NULL,
+        display_name TEXT NOT NULL,
         useful_when TEXT NOT NULL,
         description TEXT,
         enable_version JSON,

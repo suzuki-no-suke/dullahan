@@ -13,6 +13,7 @@ class TestBotsInfo(unittest.TestCase):
         cls.client.post("/bots/edit",
                     json={
                         "botname": "test",
+                        "display_name": "testbot",
                         "useful_when": "string",
                         "description": "string",
                         "supported_message_version": [
@@ -48,6 +49,7 @@ class TestBotsInfo(unittest.TestCase):
         # data update
         data = {
             "botname": "test",
+            "display_name": "test",
             "useful_when": "testing",
             "description": "unfound",
             "supported_message_version": [

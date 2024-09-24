@@ -8,6 +8,7 @@ class ChatBot(Base):
 
     pk = Column(Integer, Identity(), primary_key=True)
     botname = Column(String(255), nullable=False)
+    display_name = Column(String(512), nullable=False)
     useful_when = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     enable_version = Column(JSON)
@@ -18,6 +19,7 @@ class ChatBot(Base):
     def diff_dict(self) -> dict:
         return {
             'botname': self.botname,
+            'display_name': self.display_name,
             'useful_when': self.useful_when,
             'description': self.description,
             'enable_version': self.enable_version,
@@ -26,4 +28,4 @@ class ChatBot(Base):
         }
 
     def __str__(self) -> str:
-        return f"ChatBot - {self.pk} {self.botname} (module {self.module_filename} class {self.classname})"
+        return f"ChatBot - {self.pk} {self.botname} (aka {self.display_name}) (module {self.module_filename} class {self.classname})"
