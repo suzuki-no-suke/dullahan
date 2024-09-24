@@ -1,1 +1,1 @@
-export const DULLAHAN_URL="http://localhost:7878/";
+export const DULLAHAN_URL="http://localhost:7878";
