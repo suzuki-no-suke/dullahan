@@ -1,90 +1,10 @@
 <script>
-    const data = [
-        {
-            name: "sample",
-            disp_name: "sample bot yade",
-            description: "test test test",
-        },
-        {
-            name: "sample",
-            disp_name: "sample bot 2 yade",
-            description: "test test test",
-        }
-    ];
+    import { DULLAHAN_URL } from "$lib/constants";
+
+
 </script>
 
-<!-- laternative ideas 
-<nav class="level has-background-primary">
-    <div class="level-left">
-        <a href="/" class="level-item">
-            <img src="/dullahan.png" width="32px" height="32px" alt="アイコン & トップへ戻る" />
-            <p class="large">DuLLahan</p>
-        </a>
-          <a class="level-item" href="/">
-              Home
-          </a>
-          <a class="level-item" href="/history">
-              History
-          </a>
-    </div>
-    <div class="level-right">
-      <div class="level-item">
-        <img src="/gear.svg" width="24px" height="24px" alt="設定" />
-        </div>
-    </div>
-</nav>
--->
-
-<!-- topmenu -->
-<nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-      <a href="/" class="navbar-item">
-          <img src="/dullahan.png" width="32px" height="32px" alt="アイコン & トップへ戻る" />
-          <p class="large">DuLLahan</p>
-      </a>
-        <a class="navbar-item" href="/">
-            Home
-        </a>
-        <a class="navbar-item" href="/history">
-            History
-        </a>
-    </div>
-    <div class="navbar-menu is-active">
-      <div class="navbar-start">
-      </div>
-    </div>
-    <div class="navbar-end is-active">
-      <div class="navbar-item">
-          <img src="/gear.svg" width="32px" height="32px" alt="設定" />
-      </div>
-    </div>
-</nav>
-
-<!-- left menu -->
-<aside class="menu">
-    <p class="menu-label">
-        Items
-    </p>
-    <ul class="menu-list">
-        <li><a href="/">Home</a></li>
-        <li><a href="/history">History</a></li>
-    </ul>
-</aside>
-
-<!-- 本体部分 -->
-<h1>Select bots</h1>
-<div class="grid">
-{#each data as item}
-    <div class="cell">
-    <div class="card">
-        <header class="card-header">
-            <p class="card-holder-title">{item.disp_name}</p>
-        </header>
-        <div class="card-content">{item.description}</div>
-        <footer class="card-footer">
-            <a href="/chat/{item.name}">チャット開始する</a>
-        </footer>
-    </div>
-    </div>
-{/each}
-</div>
+<ul>
+    <li><a href="/"> Toppage </a></li>
+    <li></li>
+</ul>
