@@ -138,7 +138,7 @@ async def get_chatlist() -> list[ChatShortHistory]:
 # チャット履歴を取得するエンドポイント
 @app.get("/v1/chat/history", tags=["Chatting"])
 @app.get("/v1/chat/history/{history_id}", tags=["Chatting"])
-async def v1_get_chat_history(history_id: str | None = None):
+async def v1_get_chat_history(history_id: str | None = None) -> ChatHistory:
     dbobj = SQLFactory.default_env()
     history = TableChatHistory(dbobj)
     history_msg = TableChatHistoryList(dbobj)
@@ -161,7 +161,7 @@ async def v1_get_chat_history(history_id: str | None = None):
 
 
 @app.post("/v1/chat/send", tags=["Chatting"])
-async def v1_send_message(history_id: str, message: Message_v1):
+async def v1_send_message(history_id: str, message: Message_v1) -> Message_v1:
     dbobj = SQLFactory.default_env()
     history = TableChatHistory(dbobj)
     history_msg = TableChatHistoryList(dbobj)
