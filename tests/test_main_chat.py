@@ -65,6 +65,8 @@ class TestChatSequence(unittest.TestCase):
         response = self.client.post(f"/v1/chat/send?history_id={history_id}", json=chatdata)
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual("chatbot", data["sender_type"])
-
+        self.assertEqual(history_id, data['history_id'])
+        self.assertGreaterEqual(2, len(data['messages']))
+        self.assertIsNotNone(data['messages'][0]['message_id'])
+        self.assertIsNotNone(data['messages'][1]['message_id'])
 

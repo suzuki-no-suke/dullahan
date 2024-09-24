@@ -41,11 +41,15 @@ from src.datadef.general import GeneralStatus
 from src.datadef.chatbots import BotsInfo, BotsDetail
 from src.datadef.chat_message import Message_v1
 from src.datadef.chat_history import ChatHistory, ChatShortHistory
+from src.datadef.chat_updates import ChatDiff_v1
 
 
 # ---------------------------------------------------------
 # experimental bot dummy
-async def bot_dummy_v1(mesg: Message_v1) -> Message_v1:
+async def bot_dummy_v1(mesg: Message_v1) -> list[Message_v1]:
+    bot_resp = []
+
+    # bots core
     # expand user message
     user_msg = mesg.content
 
@@ -53,14 +57,14 @@ async def bot_dummy_v1(mesg: Message_v1) -> Message_v1:
     response = f"echobot : {user_msg}"
 
     # build response
-    bot_mesg = Message_v1.build_msg(
+    bot_resp.append(Message_v1.build_msg(
         sender=MessageSenderType.chatbot,
         botname="dummybot_v1",
         agent="dummybot_v1",
         content=response,
-    )
+    ))
 
-    return bot_mesg
+    return bot_resp
 
 
 # ---------------------------------------------------------
@@ -161,7 +165,7 @@ async def v1_get_chat_history(history_id: str | None = None) -> ChatHistory:
 
 
 @app.post("/v1/chat/send", tags=["Chatting"])
-async def v1_send_message(history_id: str, message: Message_v1) -> Message_v1:
+async def v1_send_message(history_id: str, message: Message_v1) -> ChatDiff_v1:
     dbobj = SQLFactory.default_env()
     history = TableChatHistory(dbobj)
     history_msg = TableChatHistoryList(dbobj)
@@ -171,27 +175,39 @@ async def v1_send_message(history_id: str, message: Message_v1) -> Message_v1:
     if not history.exists(history_id):
         raise HTTPException(status_code=404, detail=f"history {history_id} not exists")
 
-    # add user messages to history
-    new_message_data = message.to_db()
-    new_message_data.id = str(uuid.uuid4())
-    new_message_data.time = datetime.datetime.now()
+    # prepare response
+    chat_resp = ChatDiff_v1(
+        history_id=history_id,
+        time=datetime.datetime.now(),
+        messages=[]
+    )
+
+    message.message_id = str(uuid.uuid4()) if message.message_id is None else message.message_id
+    message.time = datetime.datetime.now() if message.time is None else message.time
+    chat_resp.messages.append(message)
 
     # update status
     history.update_status(history_id, ChatStatus.in_progress)
 
-    # message added to db
+    # add user messages to history
+    new_message_data = chat_resp.messages[0].to_db()
     msg_table.upsert_message(new_message_data)
     msg_id = new_message_data.id
     history_msg.append_new_message(history_id, msg_id, new_message_data.time)
 
-    # TBD : Chatbot 応答の構築
-    bot_msg = await bot_dummy_v1(message)
+    # TBD : response dynamically called by name
+    bot_resp = await bot_dummy_v1(message)
+
+    chat_resp.messages += bot_resp
 
     # Chatbot message added to db
-    msg_table.upsert_message(bot_msg.to_db())
-    history_msg.append_new_message(history_id, bot_msg.message_id, bot_msg.time)
+    for msg in bot_resp:
+        msg_table.upsert_message(msg.to_db())
+        history_msg.append_new_message(history_id, msg.message_id, msg.time)
+
+    # update status
     history.update_status(history_id, ChatStatus.completed)
 
     # 応答の返却
-    return bot_msg
+    return chat_resp
 
