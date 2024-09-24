@@ -2,8 +2,21 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+origins = [
+    'http://localhost:5173'
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 import datetime
 import enum
@@ -90,14 +103,14 @@ async def get_bot_detail_for_edit(botname: str) -> BotsDetail:
     return b_data
 
 @app.post("/bots/edit/", tags=["Chatbot"])
-async def edit_bot(bot: BotsDetail):
+async def edit_bot(bot: BotsDetail) -> GeneralStatus:
     dbobj = SQLFactory.default_env()
     chatbots = TableChatbot(dbobj)
 
     # upsert bot
     botdata = bot.to_db()
     upserted = chatbots.upsert_single_bot(botdata)
-    
+
     return GeneralStatus(
         status=200,
         message=f"bot successfully updated/added : {upserted.botname}",
