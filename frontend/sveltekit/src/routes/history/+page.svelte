@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { base } from "$app/paths";
     import { DULLAHAN_URL } from "$lib/constants";
     import { onMount } from 'svelte';
 
@@ -11,15 +12,15 @@
 </script>
 
 <ul>
-    <li><a href="/"> Toppage </a></li>
-    <li><a href="/history"> Chat History </a></li>
-    <li><a href="/chat">New chat</a></li>
-    <li><a href="/bots">Configure bot</a></li>
+    <li><a href="{base}/"> Toppage </a></li>
+    <li><a href="{base}/history"> Chat History </a></li>
+    <li><a href="{base}/chat">New chat</a></li>
+    <li><a href="{base}/bots">Configure bot</a></li>
 </ul>
 
 <ul>
     {#each chatHistory as chat}
-        <li>({chat.chat_status}) <a href="/chat/{chat.history_id}">{chat.title}</a></li>
+        <li>({chat.chat_status}) <a href="{base}/chat/{chat.history_id}">{chat.title}</a></li>
     {/each}
 </ul>
 

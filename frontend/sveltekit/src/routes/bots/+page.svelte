@@ -1,4 +1,5 @@
 <script type="ts">
+    import { base } from "$app/paths";
     import { DULLAHAN_URL } from "$lib/constants";
     import { onMount } from 'svelte';
 
@@ -11,14 +12,14 @@
 </script>
 
 <ul>
-    <li><a href="/"> Toppage </a></li>
-    <li><a href="/history"> Chat History </a></li>
-    <li><a href="/chat">New chat</a></li>
-    <li><a href="/bots">Configure bot</a></li>
+    <li><a href="{base}/"> Toppage </a></li>
+    <li><a href="{base}/history"> Chat History </a></li>
+    <li><a href="{base}/chat">New chat</a></li>
+    <li><a href="{base}/bots">Configure bot</a></li>
 </ul>
 
-<a href="/bots/create">作成する</a>
+<a href="{base}/bots/create">作成する</a>
 
 {#each bots as bot}
-    <li><a href="/bots/{bot.botname}">{bot.botname}</a></li> <!-- bot.name は取得したデータのプロパティ名に応じて変更してください -->
+    <li><a href="{base}/bots/{bot.botname}">{bot.botname}</a></li> <!-- bot.name は取得したデータのプロパティ名に応じて変更してください -->
 {/each}
