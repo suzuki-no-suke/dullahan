@@ -15,8 +15,8 @@ class TestChatSequence(unittest.TestCase):
         cls.client = TestClient(app)
         cls.client.post("/bots/edit",
                     json={
-                        "botname": "echobot",
-                        "display_name": "echobot",
+                        "botname": "test",
+                        "display_name": "test",
                         "useful_when": "string",
                         "description": "string",
                         "supported_message_version": [
@@ -59,7 +59,7 @@ class TestChatSequence(unittest.TestCase):
         # send message
         chatdata = {
             "sender_type": "human",
-            "botname": "echobot",
+            "botname": "test",
             "agent": "human",
             "content": "hello world",
         }

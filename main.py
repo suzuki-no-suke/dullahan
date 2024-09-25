@@ -70,7 +70,7 @@ async def get_chatbot_detail(botname: str) -> BotsInfo:
     single_bot = chatbots.get_single_bot(botname)
 
     if not single_bot:
-        return HTMLResponse(content="Bot not found", status_code=404)
+        return HTTPException(detail="Bot not found", status_code=404)
 
     b_data = BotsInfo.from_db(single_bot)
     return b_data

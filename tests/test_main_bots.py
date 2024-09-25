@@ -12,8 +12,8 @@ class TestBotsInfo(unittest.TestCase):
         cls.client = TestClient(app)
         cls.client.post("/bots/edit",
                     json={
-                        "botname": "echobot",
-                        "display_name": "echobot",
+                        "botname": "test",
+                        "display_name": "test",
                         "useful_when": "string",
                         "description": "string",
                         "supported_message_version": [
@@ -48,7 +48,7 @@ class TestBotsInfo(unittest.TestCase):
     def test_bots_edit_detail_post(self):
         # data update
         data = {
-            "botname": "echobot",
+            "botname": "test",
             "display_name": "test",
             "useful_when": "testing",
             "description": "unfound",
