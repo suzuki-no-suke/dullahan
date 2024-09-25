@@ -1,18 +1,15 @@
 from dotenv import load_dotenv
 load_dotenv()
+import os
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-origins = [
-    'http://localhost:5173'
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=os.getenv('ALLOW_ORIGINS'),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
