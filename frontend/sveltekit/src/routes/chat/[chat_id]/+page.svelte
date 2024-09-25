@@ -27,9 +27,12 @@
             const chatId = data.chat_id;
             const response = await fetch(`${DULLAHAN_URL}/v1/chat/history/${chatId}`);
             const response_body = await response.json();
+            
+            console.log(response_body)
+
             chat_title = response_body.title;
             chat_summary = response_body.summary;
-            chat_messages = response_body.message || [];
+            chat_messages = response_body.messages || [];
 
             console.log("message loaded");
         });
@@ -66,7 +69,20 @@
         .then(response => response.json())
         .then(data => {
             console.log("Message response:", data);
-            chat_messages.push(data);
+
+            // replace user message and add other messages
+            if (chat_messages.length > 0) {
+                const lastMessage = chat_messages[chat_messages.length - 1];
+                if (lastMessage.sender_type === 'human' && lastMessage.content === data.messages[0].content) {
+                    chat_messages.pop();
+                }
+            }
+
+            // 新しいメッセージを追加
+            data.messages.forEach(message => {
+                chat_messages.push(message);
+            });
+
             chat_messages = chat_messages;
         })
         .catch(error => {

@@ -8,7 +8,7 @@ class TableChatMessage:
         with self.dbobj.get_new_session() as s:
             sess = s.session
             return sess.query(ChatMessage) \
-                .filter_by(ChatMessage.id.in_(tuple(message_ids))) \
+                .filter(ChatMessage.id.in_(tuple(message_ids))) \
                 .all()
 
     def upsert_message(self, message):

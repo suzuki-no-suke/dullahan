@@ -71,3 +71,29 @@ class TestChatSequence(unittest.TestCase):
         self.assertIsNotNone(data['messages'][0]['message_id'])
         self.assertIsNotNone(data['messages'][1]['message_id'])
 
+
+    def test_continue_chatting(self):
+        # list
+        response = self.client.get("/chatlist")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        history_id = data[0]["history_id"]
+
+        # add new chat
+        chatdata = {
+            "sender_type": "human",
+            "botname": "test",
+            "agent": "human",
+            "content": "hello world",
+        }
+        response = self.client.post(f"/v1/chat/send?history_id={history_id}", json=chatdata)
+        self.assertEqual(response.status_code, 200)
+
+        # access history
+        response = self.client.get(f"/v1/chat/history/{history_id}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(history_id, data["history_id"])
+        self.assertGreaterEqual(len(data["messages"]), 2)
+
+

@@ -124,6 +124,7 @@ async def v1_get_chat_history(history_id: str | None = None) -> ChatHistory:
     dbobj = SQLFactory.default_env()
     history = TableChatHistory(dbobj)
     history_msg = TableChatHistoryList(dbobj)
+    chat_db = TableChatMessage(dbobj)
 
     if history_id is None:
         # 新規作成しそれを返す
@@ -134,7 +135,8 @@ async def v1_get_chat_history(history_id: str | None = None) -> ChatHistory:
             raise HTTPException(status_code=404, detail=f"history {history_id} not exists")
 
     data = history.get_single_history(history_id)
-    messages = history_msg.get_all_messages(history_id)
+    message_ids = [m.message_id for m in history_msg.get_all_messages(history_id)]
+    messages = chat_db.get_messages(message_ids)
 
     # build response
     response_history = ChatHistory.from_db(data)

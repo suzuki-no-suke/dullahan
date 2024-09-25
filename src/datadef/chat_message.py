@@ -33,7 +33,7 @@ class Message_v1(BaseModel):
         return Message_v1(
             message_id=db_msg.id,
             time=db_msg.time,
-            sender_type=db_msg.type,
+            sender_type=db_msg.sender_type,
             botname=db_msg.botname,
             agent=db_msg.agent,
             content=db_msg.content
