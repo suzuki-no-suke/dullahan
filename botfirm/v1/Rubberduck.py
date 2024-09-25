@@ -8,6 +8,7 @@ class Rubberduck(BotInterface_v1):
     display_name = "Rubberduck (message_v1)"
     useful_when = "Talking oneself, rubberducking"
     description = "They will listen to your story attentively, thoughtfully, and silently."
+    enable_version = ["v1"]
 
     async def bot_response(self, message: Message_v1) -> list[Message_v1]:
         bot_resp = []
