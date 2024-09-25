@@ -23,7 +23,7 @@
             const chatId = data.history_id;
 
             // /chat/<チャットID> にリダイレクト
-            goto(`/chat/${chatId}`);
+            goto(`${base}/chat/${chatId}`);
         } catch (error) {
             console.error(error);
             // エラーハンドリングをここに追加することができます
