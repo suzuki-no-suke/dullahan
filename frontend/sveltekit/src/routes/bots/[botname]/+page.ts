@@ -4,3 +4,6 @@ export function load({ params }){
         botname
     };
 }
+
+export const prerender = false;
+export const ssr = false;

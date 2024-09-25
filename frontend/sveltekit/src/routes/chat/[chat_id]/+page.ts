@@ -4,3 +4,6 @@ export function load({ params }){
         chat_id
     };
 }
+
+export const prerender = false;
+export const ssr = false;
