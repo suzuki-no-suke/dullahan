@@ -37,19 +37,19 @@ Caution:
         
         raw_resp = await perp.call(request)
 
-        perp_resp = perp.response_to_message_v1()
+        perp_resp = perp.response_to_message_v1(raw_resp)
         msg_id = str(uuid.uuid4())
         msg_time = datetime.datetime.now()
-        raw_table.insert(msg_id, raw_resp)
+        raw_table.insert(msg_id, raw_resp.to_dict())
 
         # build response
         perp_resp.message_id = msg_id
         perp_resp.time = msg_time
         perp_resp.sender_type = MessageSenderType.chatbot
         perp_resp.botname = self.botname
-        perp_resp.agent = "perplexity"
+        perp_resp.agent = self.agent_name
 
-        return perp_resp
+        return [perp_resp]
 
 
 
