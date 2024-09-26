@@ -17,9 +17,6 @@ os.environ['DB_CONN'] = os.environ['DB_CONN'].replace('sqlite:///.', 'sqlite:///
 DB_CONN = os.getenv('DB_CONN')
 print(f"db connected -> {DB_CONN}")
 
-dirpath = "./botfirm"
-module_base = "botfirm"
-
 def regist_to_db(dbobj, module_filename, classname):
     bottable = TableChatbot(dbobj)
 
@@ -29,6 +26,7 @@ def regist_to_db(dbobj, module_filename, classname):
         module_data = importlib.import_module(module_name)
         class_data = getattr(module_data, classname)
     except ImportError as imex:
+        print(f"import failed -> {imex}")
         result = f"Failed to load : {module_name} / {classname}"
         return result
 
@@ -55,12 +53,51 @@ def regist_to_db(dbobj, module_filename, classname):
 
 
 def find_all_pyfiles(dir):
-    """
-    フォルダ内のファイルを辞書にして返す
-    """
-    pass
+    files = {}
+    abspath = os.path.abspath(dir)
+    #print(f"target dir => {abspath}")
+    for entry in os.listdir(abspath):
+        entrypath = os.path.join(abspath, entry)
+        if entry[:2] == "__":
+            continue
+        elif entry == "helper":
+            continue
+        elif os.path.isdir(entrypath):
+            dircont = find_all_pyfiles(entrypath)
+            files[entry] = dircont
+        elif os.path.isfile(entrypath):
+            splited = os.path.splitext(entry)
+            if splited[1] == ".py":
+                files[splited[0]] = None
+    return files
 
+def flatten_filename(dirdict):
+    flatten_dict = {}
+    for e, d in dirdict.items():
+        if d is None:
+            flatten_dict[e] = e
+        else:
+            subdir = flatten_filename(d)
+            for sube, c in subdir.items():
+                flatten_dict[e + "." + sube] = c
+    return flatten_dict
+
+
+
+
+
+dirpath = "../botfirm"
+module_base = "botfirm"
 
 dbobj = SQLFactory.default_env()
-print(regist_to_db(dbobj, "v1.Echobot", "Echobot"))
-print(regist_to_db(dbobj, "v1.Rubberduck", "Rubberduck"))
+
+listed_dir = find_all_pyfiles(dirpath)
+flatten_dir = flatten_filename(listed_dir)
+
+print(f"flatten -> {flatten_dir}")
+
+#print(regist_to_db(dbobj, "v1.Echobot", "Echobot"))
+#print(regist_to_db(dbobj, "v1.Rubberduck", "Rubberduck"))
+
+for m, c in flatten_dir.items():
+    print(regist_to_db(dbobj, m, c))
