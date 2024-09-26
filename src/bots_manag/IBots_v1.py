@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from src.datadef.chat_message import Message_v1
+from src.datadef.chat_history import ChatHistory
 
 # インターフェイスクラスの定義
 class BotInterface_v1(ABC):
@@ -11,5 +12,5 @@ class BotInterface_v1(ABC):
     description = "abstruct interface class of bot, for Message_v1"
 
     @abstractmethod
-    async def bot_response(self, message: Message_v1) -> list[Message_v1]:
+    async def bot_response(self, message: Message_v1, history: ChatHistory) -> list[Message_v1]:
         raise NotImplementedError("This is Interface class. implement error occured on bot ")

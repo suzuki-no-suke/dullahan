@@ -5,3 +5,4 @@ class MessageSenderType(enum.Enum):
     user_meta = 'user_meta'
     chatbot = 'chatbot'
     bots_meta = 'bots_meta'
+    system = 'system'

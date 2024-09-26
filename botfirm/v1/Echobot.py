@@ -1,5 +1,6 @@
 from src.bots_manag.IBots_v1 import BotInterface_v1
 from src.datadef.chat_message import Message_v1
+from src.datadef.chat_history import ChatHistory
 from src.datadef.enums.message_sender_type import MessageSenderType
 
 class Echobot(BotInterface_v1):
@@ -10,7 +11,7 @@ class Echobot(BotInterface_v1):
     description = "echo user input to output. Helpful for testing"
     enable_version = ["v1"]
 
-    async def bot_response(self, message: Message_v1) -> list[Message_v1]:
+    async def bot_response(self, message: Message_v1, history: ChatHistory) -> list[Message_v1]:
         bot_resp = []
 
         # bots core

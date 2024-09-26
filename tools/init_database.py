@@ -53,13 +53,22 @@ cur.execute('''
         pk INTEGER PRIMARY KEY AUTOINCREMENT,
         id TEXT NOT NULL,
         time TIMESTAMP NOT NULL,
-        sender_type TEXT CHECK(sender_type IN ('human', 'user_meta', 'chatbot', 'bots_meta')) NOT NULL,
+        sender_type TEXT CHECK(sender_type IN ('human', 'user_meta', 'chatbot', 'bots_meta', 'system')) NOT NULL,
         botname TEXT NOT NULL,
         agent TEXT,
         content TEXT,
         message_version TEXT NOT NULL
     );
 ''')
+
+cur.execute('''
+    CREATE TABLE IF NOT EXISTS raw_message_data (
+        message_id TEXT PRIMARY KEY,
+        data JSON NOT NULL
+    );
+''')
+
+
 
 conn.commit()
 conn.close()
