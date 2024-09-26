@@ -23,6 +23,6 @@ class BotManager:
         except ImportError as imex:
             print(f"failed to load from {module_path} class {self.botdef.classname}")
 
-    async def send(self, message):
+    async def send(self, message, history):
         bot = self.botclass()
-        return await bot.bot_response(message)
+        return await bot.bot_response(message, history)

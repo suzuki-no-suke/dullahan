@@ -156,6 +156,13 @@ async def v1_send_message(history_id: str, message: Message_v1) -> ChatDiff_v1:
     if not history.exists(history_id):
         raise HTTPException(status_code=404, detail=f"history {history_id} not exists")
 
+    # rebuild chat history
+    history_dbdata = history.get_single_history(history_id)
+    history_data = ChatHistory.from_db(history_dbdata)
+    message_dbdata = history_msg.get_all_messages(history_id)
+    message_fullbody = msg_table.get_messages([m.message_id for m in message_dbdata])
+    history_data.messages = [Message_v1.from_db(m) for m in message_fullbody]
+
     # prepare response
     chat_resp = ChatDiff_v1(
         history_id=history_id,
@@ -183,7 +190,7 @@ async def v1_send_message(history_id: str, message: Message_v1) -> ChatDiff_v1:
 
     mgr = BotManager(botdef)
     mgr.load()
-    bot_resp = await mgr.send(message)
+    bot_resp = await mgr.send(message, history_data)
 
     chat_resp.messages += bot_resp
 

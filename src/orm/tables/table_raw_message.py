@@ -7,6 +7,6 @@ class TableRawMessage:
     def insert(self, message_id: str, raw_data : dict):
         with self.dbobj.get_new_session() as s:
             sess = s.session
-            RawMessageData(message_id=message_id, data=raw_data)
-            sess.add(raw_data)
+            raw_dbdata = RawMessageData(message_id=message_id, data=raw_data)
+            sess.add(raw_dbdata)
             sess.commit()
