@@ -32,6 +32,6 @@ class CallGemini:
         return request
 
     def response_to_message_v1(self, raw_response) -> Message_v1:
-        return Message_v1(
-            content=raw_response.text
-        )
+        return Message_v1.build_msg(
+            MessageSenderType.chatbot, "unknown", "gemini",
+            raw_response.text)

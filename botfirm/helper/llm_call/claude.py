@@ -49,6 +49,6 @@ class CallClaude:
         return request
 
     def response_to_message_v1(self, raw_response) -> Message_v1:
-        return Message_v1(
-            content=raw_response.content[0].text
-        )
+        return Message_v1.build_msg(
+            MessageSenderType.chatbot, "unknown", "claude",
+            raw_response.content[0].text)
