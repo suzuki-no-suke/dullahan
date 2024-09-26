@@ -1,20 +1,27 @@
-import openai
+import anthropic
 
 from src.datadef.chat_history import ChatHistory
 from src.datadef.chat_message import Message_v1
 from src.datadef.enums.message_sender_type import MessageSenderType
 
-class CallPerplexity:
-    def __init__(self, api_key, base_url="https://api.perplexity.ai", model="llama-3.1-sonar-small-128k-online"):
-        self.client = openai.AsyncOpenAI(api_key=api_key, base_url=base_url)
+import asyncio
+import functools
+
+class CallClaude:
+    def __init__(self, api_key, model="claude-3-5-sonnet-20240620", max_tokens=8192):
+        self.client = anthropic.Anthropic(api_key=api_key)
         self.model = model
+        self.max_tokens = max_tokens
 
     async def call(self, request):
-        response = await self.client.chat.completions.create(
-            model=self.model,
-            messages=request,
+        response = await asyncio.get_event_loop().run_in_executor(
+            None,
+            functools.partial(self.client.messages.create, data={
+                'model': self.model,
+                'messages': request,
+                'max_tokens': self.max_tokens,
+            })
         )
-
         return response
 
     def history_to_request_v1(self, user_request: Message_v1, history: ChatHistory) -> list[dict]:
@@ -42,4 +49,6 @@ class CallPerplexity:
         return request
 
     def response_to_message_v1(self, raw_response) -> Message_v1:
-        return Message_v1.build_msg(MessageSenderType.chatbot, "unknown", "unknown", raw_response.choices[0].message.content)
+        return Message_v1(
+            content=raw_response.content[0].text
+        )

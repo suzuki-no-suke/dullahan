@@ -4,9 +4,9 @@ from src.datadef.chat_history import ChatHistory
 from src.datadef.chat_message import Message_v1
 from src.datadef.enums.message_sender_type import MessageSenderType
 
-class CallPerplexity:
-    def __init__(self, api_key, base_url="https://api.perplexity.ai", model="llama-3.1-sonar-small-128k-online"):
-        self.client = openai.AsyncOpenAI(api_key=api_key, base_url=base_url)
+class CallOpenAI:
+    def __init__(self, api_key, model="gpt-4o-mini"):
+        self.client = openai.AsyncOpenAI(api_key=api_key)
         self.model = model
 
     async def call(self, request):
@@ -42,4 +42,6 @@ class CallPerplexity:
         return request
 
     def response_to_message_v1(self, raw_response) -> Message_v1:
-        return Message_v1.build_msg(MessageSenderType.chatbot, "unknown", "unknown", raw_response.choices[0].message.content)
+        return Message_v1(
+            content=raw_response.choices[0].message.content
+        )
