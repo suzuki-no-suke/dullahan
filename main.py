@@ -143,6 +143,54 @@ async def v1_get_chat_history(history_id: str | None = None) -> ChatHistory:
     response_history.messages = [Message_v1.from_db(m) for m in messages]
     return response_history
 
+@app.post("/v1/chat/history", tags=["Chatting"])
+async def v1_set_chat_history(history_id: str, title: str, summary: str) -> GeneralStatus:
+    dbobj = SQLFactory.default_env()
+    history = TableChatHistory(dbobj)
+
+    print(f"title -> {title}, summary -> {summary}")
+
+    # 履歴の存在確認
+    if not history.exists(history_id):
+        raise HTTPException(status_code=404, detail=f"history {history_id} not exists")
+
+    # タイトルとサマリーを更新
+    history.update_title_and_summary(history_id, title, summary)
+
+    return GeneralStatus(
+        status=200,
+        message="title and summary updated",
+        detail="no detail info"
+    )
+
+@app.post("/v1/chat/history/auto_title")
+async def v1_auto_summary(history_id: str) -> ChatShortHistory:
+    dbobj = SQLFactory.default_env()
+    history = TableChatHistory(dbobj)
+    history_msg = TableChatHistoryList(dbobj)
+    msg_table = TableChatMessage(dbobj)
+
+    # 履歴の存在確認
+    if not history.exists(history_id):
+        raise HTTPException(status_code=404, detail=f"history {history_id} not exists")
+
+    # メッセージの取得
+    message_dbdata = history_msg.get_all_messages(history_id)
+    if not message_dbdata:
+        raise HTTPException(status_code=404, detail=f"No messages found for history {history_id}")
+
+    first_message = msg_table.get_messages([message_dbdata[0].message_id])[0]
+    
+    # タイトルとサマリーの設定（最初のメッセージの20文字）
+    title_summary = first_message.content[:20]
+    history.update_title_and_summary(history_id, title_summary, title_summary)
+
+    # 更新されたデータの再取得
+    updated_history = history.get_single_history(history_id)
+    
+    return ChatShortHistory.from_db(updated_history)
+
+
 
 @app.post("/v1/chat/send", tags=["Chatting"])
 async def v1_send_message(history_id: str, message: Message_v1) -> ChatDiff_v1:

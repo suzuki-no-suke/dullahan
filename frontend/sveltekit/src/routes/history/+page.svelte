@@ -20,7 +20,7 @@
 
 <ul>
     {#each chatHistory as chat}
-        <li>({chat.chat_status}) <a href="{base}/chat/{chat.history_id}">{chat.title}</a></li>
+        <li>({chat.chat_status}) <a href="{base}/chat/{chat.history_id}">{chat.title}</a> : {chat.summary} </li>
     {/each}
 </ul>
 

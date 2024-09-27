@@ -39,7 +39,18 @@ class TableChatHistory:
             sess.query(ChatHistory) \
                 .filter_by(id=history_id) \
                 .update({"status": status})
-            return status
+            sess.commit()
+
+    def update_title_and_summary(self, history_id, title, summary):
+        with self.dbobj.get_new_session() as s:
+            sess = s.session
+            sess.query(ChatHistory) \
+                .filter_by(id=history_id) \
+                .update({
+                    "title": title,
+                    "summary": summary
+                })
+            sess.commit()
 
     def get_single_history(self, history_id):
         with self.dbobj.get_new_session() as s:

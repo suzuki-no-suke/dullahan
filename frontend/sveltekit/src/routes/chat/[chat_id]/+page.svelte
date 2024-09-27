@@ -90,6 +90,50 @@
             status_message = "Error sending message: " + error;
         });
     };
+
+    function updateTitleAndSumary() {
+        status_message = "Updating title and summary";
+        console.log(`input title is ${chat_title}, summary is ${chat_summary}`);
+
+        fetch(`${DULLAHAN_URL}/v1/chat/history?history_id=${data.chat_id}&title=${encodeURIComponent(chat_title)}&summary=${encodeURIComponent(chat_summary)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Title and summary updated:", data);
+            status_message = "Title and summary updated";
+        })
+        .catch(error => {
+            console.error("Error on update title and summary :", error);
+            status_message = "Error on update title and summary";
+        });
+    };
+
+    function autoTitle() {
+        status_message = "Updating title and summary";
+        
+        fetch(`${DULLAHAN_URL}/v1/chat/history/auto_title?history_id=${data.chat_id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Title and summary updated:", data);
+            status_message = "Title and summary updated";
+
+            chat_title = data.title;
+            chat_summary = data.summary;
+        })
+        .catch(error => {
+            console.error("Error on update title and summary :", error);
+            status_message = "Error on update title and summary";
+        });
+    };
 </script>
 
 <ul>
@@ -114,6 +158,10 @@ title :
 summary : 
 <textarea bind:value={chat_summary}></textarea>
 </label>
+
+<button on:click={updateTitleAndSumary}>更新</button>
+
+<button on:click={autoTitle}>自動タイトル設定</button>
 
 <!-- チャット履歴を表示 -->
 {#if chat_messages && chat_messages.length > 0}
