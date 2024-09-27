@@ -11,6 +11,8 @@
     let chat_title = "---";
     let chat_summary = "---";
     let chat_messages: any[] = [];
+    let botlist : any[] = [];
+    let selected_bot = "";
 
     // メッセージの型を定義
     interface ChatMessage {
@@ -35,6 +37,9 @@
             chat_messages = response_body.messages || [];
 
             console.log("message loaded");
+
+            const bot_list_response = await fetch(`${DULLAHAN_URL}/bots/list`);
+            botlist = await bot_list_response.json();
         });
 
     let botname = ""; // 新規変数
@@ -45,7 +50,7 @@
             message_id: "-----",
             time: new Date().toISOString(),
             sender_type: 'human',
-            botname: botname,
+            botname: selected_bot,
             agent: 'sveltekit',
             content: content
         };
@@ -54,7 +59,7 @@
 
         const messageData = {
             sender_type: 'human',
-            botname: botname,
+            botname: selected_bot,
             agent: 'sveltekit',
             content: content
         };
@@ -177,8 +182,11 @@ summary :
 <p>No Message</p>
 {/if}
 
-<!-- チャット入力欄と送信ボタン -->
-<input type="text" bind:value={botname} placeholder="ボット名" />
+<select bind:value={selected_bot}>
+    {#each botlist as bot}
+        <option value={bot.botname}>{bot.botname}</option>
+    {/each}
+</select>
 <input type="text" bind:value={content} placeholder="メッセージを入力..." />
 <button on:click={sendMessage}>送信</button>
 
