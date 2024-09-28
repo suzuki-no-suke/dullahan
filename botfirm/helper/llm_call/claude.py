@@ -14,13 +14,14 @@ class CallClaude:
         self.max_tokens = max_tokens
 
     async def call(self, request):
+        print("request is -> ")
+        print(request)
         response = await asyncio.get_event_loop().run_in_executor(
             None,
-            functools.partial(self.client.messages.create, data={
-                'model': self.model,
-                'messages': request,
-                'max_tokens': self.max_tokens,
-            })
+            functools.partial(self.client.messages.create,
+                model=self.model,
+                messages=request,
+                max_tokens=self.max_tokens)
         )
         return response
 
