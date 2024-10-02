@@ -27,6 +27,7 @@
 	"type": "module",
 	"dependencies": {
 		"@magidoc/plugin-svelte-marked": "^6.0.1",
+		"@sveltejs/adapter-node": "^5.2.5",
 		"@types/marked": "^6.0.0",
 		"carta-md": "^4.5.0",
 		"isomorphic-dompurify": "^2.16.0",
