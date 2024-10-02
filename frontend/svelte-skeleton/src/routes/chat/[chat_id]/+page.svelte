@@ -3,6 +3,15 @@
     import { DULLAHAN_URL } from "$lib/constants";
     import { onMount } from "svelte";
     import { fetchBots } from "$lib/load_bots.js";
+    import 'carta-md/default.css';
+    import DOMPurify from 'isomorphic-dompurify';
+    import { Carta, MarkdownEditor } from "carta-md";
+    import Markdown from '@magidoc/plugin-svelte-marked';
+    
+    const carta = new Carta({
+        sanitizer: DOMPurify.sanitize,
+        disableIcons: true,
+    });
 
     export let data;
 
@@ -172,7 +181,17 @@
             <header class="flex justify-between">
                 <strong>{message.agent}</strong> ({message.sender_type})
             </header>
-            <p>{message.content}</p>
+
+            <!--
+            <MarkdownEditor {carta} value={message.content} 
+                mode="tabs"
+                disableToolbar={true}
+                selectedTab="preview"
+                theme="discord"
+            />
+            -->
+            <Markdown source={message.content} />
+
             <footer class="flex justify-between">
                 <small>{message.time} (botname : {message.botname})</small>
             </footer>
@@ -191,8 +210,18 @@
                 <option class="input-group-shim" value={bot.botname}>{bot.botname}</option>
             {/each}
         </select>
+
+        <!--
+        <MarkdownEditor {carta}
+            mode="tabs"
+            disableToolbar={true}
+            selectedTab="write"
+            bind:value={content}
+        />
+        -->
+
         <textarea
-            bind:value={content} placeholder="メッセージを入力..." rows=1
+            bind:value={content} placeholder="メッセージを入力..." rows=2
             class="bg-transparent border-0 ring-0"
         />
         <button class="variant-filled-primary" on:click={sendMessage}>送信</button>
