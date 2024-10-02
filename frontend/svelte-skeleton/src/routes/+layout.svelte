@@ -40,8 +40,8 @@
     <AppRail class="flex-none">
         <svelte:fragment slot="lead">
             <AppRailAnchor on:click={create_chat} disable={create_disabled}>New Chat</AppRailAnchor>
-            <AppRailAnchor href="/history">Chat History</AppRailAnchor>
-            <AppRailAnchor href="/bots">Edit bots</AppRailAnchor>
+            <AppRailAnchor href="{base}/history">Chat History</AppRailAnchor>
+            <AppRailAnchor href="{base}/bots">Edit bots</AppRailAnchor>
         </svelte:fragment>
 
         <svelte:fragment slot="trail">
