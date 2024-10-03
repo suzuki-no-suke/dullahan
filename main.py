@@ -107,7 +107,9 @@ async def get_chatlist() -> list[ChatShortHistory]:
     dbobj = SQLFactory.default_env()
     history = TableChatHistory(dbobj)
     
-    all_history = history.get_all_history()
+    #all_history = history.get_all_history()
+    #all_history = history.get_all_history_with_messagetime()
+    all_history = history.get_all_history_time_ordered()
     # print(all_history)
 
     history_list = [ChatShortHistory.from_db(h) for h in all_history]

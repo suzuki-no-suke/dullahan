@@ -34,6 +34,7 @@ cur.execute('''
         status TEXT CHECK(status IN ('waiting', 'in_progress', 'failed', 'completed')) NOT NULL,
         title TEXT,
         summary TEXT, 
+        created_at TIMESTAMP,
         message_version TEXT NOT NULL
     );
 ''')

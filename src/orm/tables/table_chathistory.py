@@ -1,4 +1,10 @@
 from src.orm.models.chat_history import ChatHistory, ChatStatus
+from src.orm.models.chat_message_list import ChatMessageList
+
+import datetime
+
+from sqlalchemy import select, func, desc
+from sqlalchemy.orm import aliased
 
 class TableChatHistory:
     def __init__(self, dbobj):
@@ -9,6 +15,26 @@ class TableChatHistory:
             sess = s.session
             return sess.query(ChatHistory).all()
 
+    def get_all_history_time_ordered(self):
+        with self.dbobj.get_new_session() as s:
+            sess = s.session
+            return sess.query(ChatHistory).asc(ChatHistory.created_at).all()
+
+    def get_all_history_with_messagetime(self):
+        with self.dbobj.get_new_session() as s:
+            sess = s.session
+            subquery = (
+                select(func.max(ChatMessageList.time).label('latest_time'))
+                    .where(ChatMessageList.history_id == ChatHistory.id)
+                    .scalar_subquery()
+                    .correlate(ChatHistory)
+            )
+            query = (
+                select(ChatHistory)
+                    .order_by(desc(subquery))
+            )
+            return sess.execute(query).scalars().all()
+
     def create_new_history(self, uuid):
         with self.dbobj.get_new_session() as s:
             sess = s.session
@@ -17,6 +43,7 @@ class TableChatHistory:
                 status=ChatStatus.waiting,
                 title=None,
                 summary=None,
+                created_at=datetime.datetime.now(),
                 message_version="v1"
             )
             sess.add(new_history)
