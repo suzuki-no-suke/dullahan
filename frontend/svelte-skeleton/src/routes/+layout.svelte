@@ -23,7 +23,14 @@
             create_disabled = false;
         }
     };
+
+    $: outerWidth = 0;
+    $: innerWidth = 0;
+    $: outerHeight = 0;
+    $: innerHeight = 0;
 </script>
+
+<svelte:window bind:innerWidth bind:outerWidth bind:innerHeight bind:outerHeight />
 
 <AppBar>
 	<svelte:fragment slot="lead">
@@ -47,6 +54,12 @@
         <svelte:fragment slot="trail">
             <AppRailTile>
                 <p>by Svelte Skeleton</p>
+            </AppRailTile>
+            <AppRailTile>
+                <p>inner W {innerWidth}px x H {innerHeight}px</p>
+            </AppRailTile>
+            <AppRailTile>
+                <p>outer W {outerWidth}px x H {outerHeight}px</p>
             </AppRailTile>
         </svelte:fragment>
     </AppRail>
