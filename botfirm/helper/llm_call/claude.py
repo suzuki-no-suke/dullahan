@@ -16,6 +16,7 @@ class CallClaude:
     async def call(self, request):
         print("request is -> ")
         print(request)
+        #try:
         response = await asyncio.get_event_loop().run_in_executor(
             None,
             functools.partial(self.client.messages.create,
@@ -23,6 +24,8 @@ class CallClaude:
                 messages=request,
                 max_tokens=self.max_tokens)
         )
+        #except anthropic.RateLimitError as ex:
+        #   hit rate limit
         return response
 
     def history_to_request_v1(self, user_request: Message_v1, history: ChatHistory) -> list[dict]:
