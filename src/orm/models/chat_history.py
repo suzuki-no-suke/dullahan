@@ -6,6 +6,8 @@ from sqlalchemy.types import Integer, String, DateTime
 
 from src.datadef.enums.chat_status import ChatStatus
 
+import datetime
+
 class ChatHistory(Base):
     __tablename__ = 'chat_history'
 
@@ -15,6 +17,7 @@ class ChatHistory(Base):
     title = Column(String, nullable=True)
     summary = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=False))
+    updated_at = Column(DateTime(timezone=False))
     message_version = Column(String, nullable=False)
 
     def diff_dict(self):
@@ -23,6 +26,7 @@ class ChatHistory(Base):
             'title': self.title,
             'summary': self.summary,
             'message_version': self.message_version,
+            'updated_at': datetime.datetime.now(),
         }
 
     def __str__(self) -> str:

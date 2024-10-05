@@ -35,6 +35,7 @@ cur.execute('''
         title TEXT,
         summary TEXT, 
         created_at TIMESTAMP,
+        updated_at TIMESTAMP,
         message_version TEXT NOT NULL
     );
 ''')
