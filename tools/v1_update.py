@@ -15,6 +15,9 @@ cur = conn.cursor()
 # ALTER TABLE
 cur.execute('''
     ALTER TABLE chat_history ADD COLUMN created_at TIMESTAMP;
+''')
+
+cur.execute('''
     ALTER TABLE chat_history ADD COLUMN updated_at TIMESTAMP;
 ''')
 

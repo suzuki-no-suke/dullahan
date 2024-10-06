@@ -4,7 +4,6 @@ from src.orm.models.chat_message_list import ChatMessageList
 import datetime
 
 from sqlalchemy import select, func, desc
-from sqlalchemy.orm import aliased
 
 class TableChatHistory:
     def __init__(self, dbobj):
@@ -18,7 +17,7 @@ class TableChatHistory:
     def get_all_history_time_ordered(self):
         with self.dbobj.get_new_session() as s:
             sess = s.session
-            return sess.query(ChatHistory).asc(ChatHistory.created_at).all()
+            return sess.query(ChatHistory).order_by(desc(ChatHistory.created_at)).all()
 
     def get_all_history_with_messagetime(self):
         with self.dbobj.get_new_session() as s:
