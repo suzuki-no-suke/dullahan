@@ -16,6 +16,7 @@
     onMount(async () => {
         const response = await fetch(`${DULLAHAN_URL}/chatlist`);
         chatHistory = await response.json();
+        print(chatHistory);
     });
 
     $: paginatedSource = chatHistory.slice(

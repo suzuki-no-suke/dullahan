@@ -1,12 +1,20 @@
 <script lang="ts">
-    const history = [
+    import Breakpoints from "svelte-breakpoints";
 
-    ]
+    const mediaQueries = {
+        small: '(min-width: 0px)',
+        medium: '(min-width: 767px)',
+        large: '(min-wdith: 1024px)',
+    };
+
+    const history = [
+        {}
+    ];
 
     let openHamberger = true;
     function toggleHamburger() {
         openHamberger = !openHamberger;
-    }
+    };
 </script>
 
 <!-- whole body -->
@@ -33,17 +41,58 @@
 
     <!-- chat history table -->
     <div>
+        <Breakpoints queries={mediaQueries}>
+            {#snippet small()}
+                <p>display in small mode</p>                
+            {/snippet}
+            {#snippet medium()}
+                <p>display in medium mode</p>
+            {/snippet}
+            {#snippet large()}
+                <p>display in large mode</p>                
+            {/snippet}
+        </Breakpoints>
         <table>
-            <thead>
-                <tr>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td></td>
-                </tr>
-            </tbody>
+            <Breakpoints queries={mediaQueries}>
+                {#snippet small()}
+                <thead>
+                    <tr>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                    </tr>
+                </tbody>
+                {/snippet}
+
+                {#snippet medium()}
+                <thead>
+                    <tr>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                    </tr>
+                </tbody>
+                {/snippet}
+
+                {#snippet large()}
+                <thead>
+                    <tr>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                    </tr>
+                </tbody>
+                {/snippet}
+            </Breakpoints>
         </table>
     </div>
 </div>
