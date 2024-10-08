@@ -1,6 +1,7 @@
 <script lang="ts">
     import { base } from "$app/paths";
     import { createChat } from "$lib/create_chat";
+    import { goto } from "$app/navigation";
 
     let openHamberger = false;
     function toggleHamburger() {
@@ -8,6 +9,7 @@
     };
 
     
+    let message;
     let create_disabled = false;
     const create_chat = async () => {
         create_disabled = true;
