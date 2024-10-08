@@ -26,7 +26,7 @@ cur.execute('''
     SET updated_at = COALESCE(
         (SELECT MAX(time)
         FROM chat_message_list
-        WHERE chat_message_list.message_id = chat_history.id),
+        WHERE chat_message_list.history_id = chat_history.id),
         '2024-10-01 00:00:00'
     );
 ''')
@@ -36,7 +36,7 @@ cur.execute('''
     SET created_at = COALESCE(
         (SELECT MIN(time)
         FROM chat_message_list
-        WHERE chat_message_list.message_id = chat_history.id),
+        WHERE chat_message_list.history_id = chat_history.id),
         '2024-10-01 00:00:00'
     );
 ''')
