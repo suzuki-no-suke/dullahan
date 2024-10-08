@@ -23,6 +23,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@sveltejs/adapter-node": "^5.2.5",
 		"flowbite": "^2.5.2",
 		"flowbite-svelte": "^0.46.22",
 		"flowbite-svelte-icons": "^1.6.1"
