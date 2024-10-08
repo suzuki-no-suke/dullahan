@@ -133,67 +133,76 @@
 </script>
 
 <!-- whole body -->
-<div class="bg-gray-800">
+<div class="bg-gray-200">
     <!-- top menu-->
     <div class="fixed top-0 w-screen h-8 flex bg-blue-400">
-        <div class="w-1/6 align-middle text-center"><button on:click={toggleHamburger}>(h)</button></div>
-        <div class="flex-auto grow justify-center align-middle text-left">Chat History</div>
+        <div class="w-1/4 align-middle text-center"><button on:click={toggleHamburger}>(h)</button></div>
+        <div class="flex-auto grow justify-center align-middle text-left ml-1">Chat History</div>
     </div>
 
     <!-- left side drawoer -->
     {#if openHamberger}
-    <div class="fixed left-0 top-0 bg-gray-100 flex">
-        <div>
-            <div class="w-1/6 align-middle text-center h-8"><button on:click={toggleHamburger}>(h)</button></div>
+    <div class="fixed left-0 top-0 bg-gray-100 grid w-1/4">
+        <div class="align-middle text-center h-8 grid-row">
+            <button on:click={toggleHamburger}>(h)</button>
         </div>
-        <ul class="w-1/6">
-            <li><a href="/">History (Top)</a></li>
-            <li>new chat</li>
-        </ul>
+        <div class="align-middle text-center grid-row m-2 p-1">
+            <button><a href="/">History (Top)</a></button>
+        </div>
+        <div class="align-middle text-center grid-row m-2 p-1">
+            <button>New chat</button>
+        </div>
     </div>
     {/if}
 
     <!-- status bar -->
-    <div class="bg-surface-500/30 p-4">
-        <h1>Chat</h1>
-        <p>chat status : {status}</p>
-
-        <p>current status : {status_message}</p>
+    <div class="bg-slate-300 p-2 mt-8 grid">
+        <p class="grid-row">Chat Status : {status}</p>
+        <p class="grid-row">{status_message}</p>
     </div>
 
     <!-- top editor area -->
-    <div class="bg-slate-100 p-4 {top_editor_open ? 'flex-box' : 'hidden'}">
-        <label>
+    <div class="border gridrounded-lg m-1 bg-slate-100 p-4 {top_editor_open ? 'flex-box' : 'hidden'}">
+        <h2>チャット要約</h2>
+        <label class="grid-row">
             title : 
-            <input type="text" bind:value={chat_title}/><br/>
-            </label>
-            
-            <label>
+            <input type="text" bind:value={chat_title}/>
+        </label>
+        
+        <label class="grid-row">
             summary : 
             <textarea bind:value={chat_summary}></textarea>
         </label>
 
-        <button on:click={updateTitleAndSumary_button}>更新</button>
-        <button on:click={autoTitle_button}>自動タイトル設定</button>
+        <div class="grid-row">
+            <button on:click={updateTitleAndSumary_button}>更新</button>
+            <button on:click={autoTitle_button}>自動タイトル設定</button>
+        </div>
     </div>
-    <button on:click={toggle_top_editor}>{top_editor_open ? "閉じる" : "開く"}</button>
+
+    <!-- toggle top editor area button -->
+    <div class="bg-slate-100">
+        <button on:click={toggle_top_editor}>{top_editor_open ? "閉じる" : "チャット要約 : 開く"}</button>
+    </div>
 
     <!-- chat history -->
-    <div class="bg-green-600 mt-8 {bottom_open ? 'mb-36' : 'mb-8'}">
+    <div class="bg-green-400 py-1 {bottom_open ? 'mb-36' : 'mb-0'}">
     {#if chat_messages && chat_messages.length > 0}
         {#each chat_messages as message}
-        <div class="p-4">
-            <header class="flex justify-between">
-                <strong>{message.agent}</strong> ({message.sender_type})
-            </header>
+        <div class="m-2 p-2 border rounded-xl bg-green-200">
+            <div class="flex justify-between font-bold text-lg">
+                <span>{message.agent}</span>
+                <span>({message.sender_type})</span>
+            </div>
 
-            <div>
+            <div class="py-2">
                 <p>{message.content}</p>
             </div>
 
-            <footer class="flex justify-between">
-                <small>{message.time} (botname : {message.botname})</small>
-            </footer>
+            <div class="grid text-xs">
+                <span>{message.time}</span>
+                <span>(botname : {message.botname})</span>
+            </div>
         </div>
         {/each}
     {:else}
@@ -204,21 +213,28 @@
     </div>
 
     <!-- prompt input -->
-    <div class="bg-blue-200 fixed bottom-0 w-full flex">
-        <button class="h-8 justify-end" on:click={toggle_bottom}>閉じたり開いたり</button>
+    <div class="bg-transparent fixed bottom-0 w-full">
+        <button class="bg-blue-200 fixed p-1 border-2 border-blue-300 rounded-t-lg right-0 {bottom_open ? 'bottom-36' : 'bottom-0'}" on:click={toggle_bottom}>閉じたり開いたり</button>
+
         {#if bottom_open}
-        <div class="{bottom_open ? 'h-36' : 'h-8'}">
-            <select bind:value={selected_bot}>
-                {#each botlist as bot}
-                    <option class="input-group-shim" value={bot.botname}>{bot.botname}</option>
-                {/each}
-            </select>
-    
-            <textarea
-                bind:value={content} placeholder="メッセージを入力..." rows=2
-                class="bg-transparent border-0 ring-0"
-            />
-            <button class="variant-filled-primary" on:click={sendMessage}>送信</button>
+        <div class="bg-blue-200 {bottom_open ? 'h-36' : 'h-0'}">
+            <div>
+                <label for="botname">botname: 
+                    <select id="botname" bind:value={selected_bot} >
+                        {#each botlist as bot}
+                            <option class="input-group-shim" value={bot.botname}>{bot.botname}</option>
+                        {/each}
+                    </select>
+                </label>
+            </div>
+
+            <div class="flex">
+                <textarea
+                    class="w-5/6 mr-1 resize-y"
+                    bind:value={content} placeholder="メッセージを入力..." rows=3
+                />
+                <button class="bg-lime-400 w-1/6" on:click={sendMessage}>送信</button>
+            </div>
         </div>
         {/if}
     </div>
