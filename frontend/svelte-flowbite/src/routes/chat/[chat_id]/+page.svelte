@@ -5,6 +5,8 @@
     import { fetchBots } from "$lib/load_bots";
     import { autoTitle } from "$lib/auto_title";
     import { updateTitleAndSummary } from "$lib/update_chat";
+    import { createChat } from "$lib/create_chat";
+    import { goto } from "$app/navigation";
 
     export let data;
 
@@ -116,12 +118,28 @@
         chat_summary = result.chat_summary;
     }
     
+    let create_disabled = false;
+    const create_chat = async () => {
+        create_disabled = true;
+
+        const create_result = await createChat();
+
+        status_message = create_result.message;
+
+        if (create_result.result) {
+            const chatId = create_result.history_id;
+            goto(`${base}/chat/${chatId}`);
+        } else {
+            create_disabled = false;
+        }
+    };
+
     let openHamberger = false;
     function toggleHamburger() {
         openHamberger = !openHamberger;
     };
     
-    let bottom_open = false;
+    let bottom_open = true;
     function toggle_bottom() {
         bottom_open = !bottom_open;
     };
@@ -147,10 +165,10 @@
             <button on:click={toggleHamburger}>(h)</button>
         </div>
         <div class="align-middle text-center grid-row m-2 p-1">
-            <button><a href="/">History (Top)</a></button>
+            <button><a href="{base}/">History (Top)</a></button>
         </div>
         <div class="align-middle text-center grid-row m-2 p-1">
-            <button>New chat</button>
+            <button on:click={create_chat}>New chat</button>
         </div>
     </div>
     {/if}

@@ -2,12 +2,32 @@
     import { base } from "$app/paths";
     import { DULLAHAN_URL } from "$lib/constants";
     import { onMount } from 'svelte';
+    import { createChat } from "$lib/create_chat";
+    import { goto } from "$app/navigation";
 
     let chatHistory: any[] = [];
     onMount(async () => {
         const response = await fetch(`${DULLAHAN_URL}/chatlist`);
         chatHistory = await response.json();
     });
+
+    let message = "";
+
+    let create_disabled = false;    
+    const create_chat = async () => {
+        create_disabled = true;
+
+        const create_result = await createChat();
+
+        message = create_result.message;
+
+        if (create_result.result) {
+            const chatId = create_result.history_id;
+            goto(`${base}/chat/${chatId}`);
+        } else {
+            create_disabled = false;
+        }
+    };
 
     let openHamberger = false;
     function toggleHamburger() {
@@ -25,14 +45,16 @@
     
     <!-- left side drawoer -->
     {#if openHamberger}
-    <div class="fixed left-0 top-0 bg-gray-100">
-        <div class="w-1/6 text-center">
-            <div class="align-left h-8"><button on:click={toggleHamburger}>(h)</button></div>
+    <div class="fixed left-0 top-0 bg-gray-100 grid w-1/4">
+        <div class="align-middle text-center h-8 grid-row">
+            <button on:click={toggleHamburger}>(h)</button>
         </div>
-        <ul>
-            <li><a href="/">History (Top)</a></li>
-            <li>new chat</li>
-        </ul>
+        <div class="align-middle text-center grid-row m-2 p-1">
+            <button><a href="{base}/">History (Top)</a></button>
+        </div>
+        <div class="align-middle text-center grid-row m-2 p-1">
+            <button on:click={create_chat}>New chat</button>
+        </div>
     </div>
     {/if}
 
