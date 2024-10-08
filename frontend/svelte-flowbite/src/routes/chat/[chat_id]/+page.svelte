@@ -2,7 +2,9 @@
     import { base } from "$app/paths";
     import { DULLAHAN_URL } from "$lib/constants";
     import { onMount } from "svelte";
-    import { fetchBots } from "$lib/load_bots.js";
+    import { fetchBots } from "$lib/load_bots";
+    import { autoTitle } from "$lib/auto_title";
+    import { updateTitleAndSummary } from "$lib/update_chat";
 
     export let data;
 
@@ -40,7 +42,7 @@
             console.log("message loaded");
 
             botlist = await fetchBots();
-        });
+    });
 
     let content = "";  // 新規変数
 
@@ -95,52 +97,62 @@
         });
     };
 
-    function updateTitleAndSumary() {
+    async function updateTitleAndSumary_button() {
         status_message = "Updating title and summary";
         console.log(`input title is ${chat_title}, summary is ${chat_summary}`);
 
-        fetch(`${DULLAHAN_URL}/v1/chat/history?history_id=${data.chat_id}&title=${encodeURIComponent(chat_title)}&summary=${encodeURIComponent(chat_summary)}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Title and summary updated:", data);
-            status_message = "Title and summary updated";
-        })
-        .catch(error => {
-            console.error("Error on update title and summary :", error);
-            status_message = "Error on update title and summary";
-        });
+        const result = await updateTitleAndSummary(data.chat_id, chat_title, chat_summary);
+
+        status_message = result.status_message;
     };
 
-    function autoTitle() {
+    async function autoTitle_button() {
         status_message = "Updating title and summary";
         
-        fetch(`${DULLAHAN_URL}/v1/chat/history/auto_title?history_id=${data.chat_id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Title and summary updated:", data);
-            status_message = "Title and summary updated";
+        const result = await autoTitle(data.chat_id);
 
-            chat_title = data.title;
-            chat_summary = data.summary;
-        })
-        .catch(error => {
-            console.error("Error on update title and summary :", error);
-            status_message = "Error on update title and summary";
-        });
+        status_message = result.status_message;
+        chat_title = result.chat_title;
+        chat_summary = result.chat_summary;
+    }
+    
+    let openHamberger = false;
+    function toggleHamburger() {
+        openHamberger = !openHamberger;
     };
+    
+    let bottom_open = false;
+    function toggle_bottom() {
+        bottom_open = !bottom_open;
+    };
+
+    let top_editor_open = false;
+    function toggle_top_editor() {
+        top_editor_open = !top_editor_open
+    }
 </script>
 
-<div class="h-full grid grid-rows-[1fr_auto] gap-1">
+<!-- whole body -->
+<div class="bg-gray-800">
+    <!-- top menu-->
+    <div class="fixed top-0 w-screen h-8 flex bg-blue-400">
+        <div class="w-1/6 align-middle text-center"><button on:click={toggleHamburger}>(h)</button></div>
+        <div class="flex-auto grow justify-center align-middle text-left">Chat History</div>
+    </div>
+
+    <!-- left side drawoer -->
+    {#if openHamberger}
+    <div class="fixed left-0 top-0 bg-gray-100 flex">
+        <div>
+            <div class="w-1/6 align-middle text-center h-8"><button on:click={toggleHamburger}>(h)</button></div>
+        </div>
+        <ul class="w-1/6">
+            <li><a href="/">History (Top)</a></li>
+            <li>new chat</li>
+        </ul>
+    </div>
+    {/if}
+
     <!-- status bar -->
     <div class="bg-surface-500/30 p-4">
         <h1>Chat</h1>
@@ -150,7 +162,7 @@
     </div>
 
     <!-- top editor area -->
-    <div class="bg-surface-500/30 p-4">
+    <div class="bg-slate-100 p-4 {top_editor_open ? 'flex-box' : 'hidden'}">
         <label>
             title : 
             <input type="text" bind:value={chat_title}/><br/>
@@ -161,11 +173,13 @@
             <textarea bind:value={chat_summary}></textarea>
         </label>
 
-        <button on:click={updateTitleAndSumary}>更新</button>
-        <button on:click={autoTitle}>自動タイトル設定</button>
+        <button on:click={updateTitleAndSumary_button}>更新</button>
+        <button on:click={autoTitle_button}>自動タイトル設定</button>
     </div>
+    <button on:click={toggle_top_editor}>{top_editor_open ? "閉じる" : "開く"}</button>
 
     <!-- chat history -->
+    <div class="bg-green-600 mt-8 {bottom_open ? 'mb-36' : 'mb-8'}">
     {#if chat_messages && chat_messages.length > 0}
         {#each chat_messages as message}
         <div class="p-4">
@@ -187,19 +201,25 @@
             <p>No Message</p>
         </div>
     {/if}
+    </div>
 
     <!-- prompt input -->
-    <div class="input-group input-group-divider grid-cols-[auto_1fr_auto] rounded-container-token">
-        <select bind:value={selected_bot}>
-            {#each botlist as bot}
-                <option class="input-group-shim" value={bot.botname}>{bot.botname}</option>
-            {/each}
-        </select>
-
-        <textarea
-            bind:value={content} placeholder="メッセージを入力..." rows=2
-            class="bg-transparent border-0 ring-0"
-        />
-        <button class="variant-filled-primary" on:click={sendMessage}>送信</button>
+    <div class="bg-blue-200 fixed bottom-0 w-full flex">
+        <button class="h-8 justify-end" on:click={toggle_bottom}>閉じたり開いたり</button>
+        {#if bottom_open}
+        <div class="{bottom_open ? 'h-36' : 'h-8'}">
+            <select bind:value={selected_bot}>
+                {#each botlist as bot}
+                    <option class="input-group-shim" value={bot.botname}>{bot.botname}</option>
+                {/each}
+            </select>
+    
+            <textarea
+                bind:value={content} placeholder="メッセージを入力..." rows=2
+                class="bg-transparent border-0 ring-0"
+            />
+            <button class="variant-filled-primary" on:click={sendMessage}>送信</button>
+        </div>
+        {/if}
     </div>
 </div>
