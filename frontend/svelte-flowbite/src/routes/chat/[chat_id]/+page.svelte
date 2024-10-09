@@ -238,7 +238,7 @@
                 <label for="botname">botname: 
                     <select id="botname" bind:value={selected_bot} >
                         {#each botlist as bot}
-                            <option class="input-group-shim" value={bot.botname}>{bot.botname}</option>
+                            <option class="input-group-shim" value={bot.botname}>{bot.display_name}</option>
                         {/each}
                     </select>
                 </label>
