@@ -238,9 +238,25 @@ async def v1_send_message(history_id: str, message: Message_v1) -> ChatDiff_v1:
     if not botdef:
         raise HTTPException(404, f"requested bot ({message.botname}) not found")
 
-    mgr = BotManager(botdef)
-    mgr.load()
-    bot_resp = await mgr.send(message, history_data)
+    try:
+        mgr = BotManager(botdef)
+        mgr.load()
+        bot_resp = await mgr.send(message, history_data)
+    except Exception as ex:
+        history.update_status(history_id, ChatStatus.failed)
+        bot_resp += Message_v1.build_msg(
+            sender=MessageSenderType.bots_meta,
+            botname="error",
+            agent="dullahan",
+            content=f"bot process failed with exception : {ex}"
+        )
+        for msg in bot_resp:
+            msg_table.upsert_message(msg.to_db())
+            history_msg.append_new_message(history_id, msg.message_id, msg.time)
+        return GeneralStatus(
+            status=500,
+            message=f"bot message failed with exception : {ex}"
+        )
 
     chat_resp.messages += bot_resp
 
