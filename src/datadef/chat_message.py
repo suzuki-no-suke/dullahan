@@ -45,7 +45,7 @@ class Message_v1(BaseModel):
             time=self.time,
             sender_type=self.sender_type,
             botname=self.botname,
-            agent=self.botname,
+            agent=self.agent,
             content=self.content,
             message_version="v1",
         )
