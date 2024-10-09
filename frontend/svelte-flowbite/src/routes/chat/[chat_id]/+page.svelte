@@ -213,9 +213,7 @@
                 <span>({message.sender_type})</span>
             </div>
 
-            <div class="py-2">
-                <p>{message.content}</p>
-            </div>
+            <div class="py-2 whitespace-pre-wrap">{message.content}</div>
 
             <div class="grid text-xs">
                 <span>{message.time}</span>
